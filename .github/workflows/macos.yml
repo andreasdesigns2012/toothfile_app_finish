@@ -21,8 +21,11 @@ jobs:
 
       - run: flutter build macos --release
 
-      - run: zip -qq -r -9 ToothFile-macos.zip Runner.app
-        working-directory: build/macos/Build/Products/Release
+      - name: Package macOS app
+        run: |
+          APP_NAME=$(cat macos/Flutter/ephemeral/.app_filename)
+          cd build/macos/Build/Products/Release
+          zip -qq -r -9 ToothFile-macos.zip "$APP_NAME"
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4

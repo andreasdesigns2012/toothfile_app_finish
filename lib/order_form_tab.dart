@@ -4,10 +4,12 @@ import 'package:flutter_application_3/create_order_dialog.dart';
 import 'package:flutter_application_3/edit_order_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:flutter_application_3/order_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderFormTab extends StatefulWidget {
   const OrderFormTab({super.key});
@@ -120,38 +122,45 @@ class _OrderFormTabState extends State<OrderFormTab> {
         bucketPath = fileUrl;
       }
       final fileName = p.basename(fileUrl);
-
-      final data = await supabase.storage
-          .from('OrderForm')
-          .download(bucketPath);
-
-      Directory? downloadsDirectory;
-      if (Platform.isAndroid) {
-        downloadsDirectory = await getExternalStorageDirectory();
-      } else if (Platform.isIOS) {
-        downloadsDirectory = await getApplicationDocumentsDirectory();
-      } else {
-        downloadsDirectory = await getDownloadsDirectory();
-      }
-
-      if (downloadsDirectory == null) {
+      if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
+        final signedUrl = await supabase.storage
+            .from('OrderForm')
+            .createSignedUrl(bucketPath, 600);
+        final uri = Uri.parse(signedUrl);
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not find downloads directory')),
+            const SnackBar(content: Text('Downloading via browser')),
           );
         }
-        return;
-      }
-
-      final file = File('${downloadsDirectory.path}/$fileName');
-      await file.writeAsBytes(data);
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Downloaded $fileName to ${downloadsDirectory.path}'),
-          ),
-        );
+      } else {
+        final data = await supabase.storage
+            .from('OrderForm')
+            .download(bucketPath);
+        final prefs = await SharedPreferences.getInstance();
+        final prefPath = prefs.getString('download_path');
+        Directory targetDir;
+        if (prefPath != null && prefPath.isNotEmpty) {
+          targetDir = Directory(prefPath);
+          if (!targetDir.existsSync()) {
+            targetDir.createSync(recursive: true);
+          }
+        } else {
+          Directory? downloadsDir;
+          try {
+            downloadsDir = await getDownloadsDirectory();
+          } catch (_) {}
+          targetDir = downloadsDir ?? await getApplicationDocumentsDirectory();
+        }
+        final file = File('${targetDir.path}/$fileName');
+        await file.writeAsBytes(data);
+        final uri = Uri.file(file.path);
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('File saved to: ${file.path}')),
+          );
+        }
       }
     } catch (e) {
       if (context.mounted) {

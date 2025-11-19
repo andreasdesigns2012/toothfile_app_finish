@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ReceivedFilesTab extends StatefulWidget {
   const ReceivedFilesTab({super.key});
@@ -478,35 +480,79 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
   Future<void> _downloadFile(String path, String fileName) async {
     try {
       setState(() => _downloading = true);
-      final data = await Supabase.instance.client.storage
-          .from('dental-files')
-          .download(path);
-
-      final downloadsDir = await getDownloadsDirectory();
-      final file = File('${downloadsDir!.path}/$fileName');
-      await file.writeAsBytes(data);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(
-                  Icons.check_circle_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
-                Expanded(child: Text('File downloaded to: ${file.path}')),
-              ],
+      if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
+        final url = await Supabase.instance.client.storage
+            .from('dental-files')
+            .createSignedUrl(path, 600);
+        final uri = Uri.parse(url);
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(
+                    Icons.open_in_browser_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(child: Text('Downloading via browser')),
+                ],
+              ),
+              backgroundColor: const Color(0xFF16A34A),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-            backgroundColor: const Color(0xFF16A34A),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+          );
+        }
+      } else {
+        final data = await Supabase.instance.client.storage
+            .from('dental-files')
+            .download(path);
+        final prefs = await SharedPreferences.getInstance();
+        final prefPath = prefs.getString('download_path');
+        Directory targetDir;
+        if (prefPath != null && prefPath.isNotEmpty) {
+          targetDir = Directory(prefPath);
+          if (!targetDir.existsSync()) {
+            targetDir.createSync(recursive: true);
+          }
+        } else {
+          Directory? downloadsDir;
+          try {
+            downloadsDir = await getDownloadsDirectory();
+          } catch (_) {}
+          targetDir = downloadsDir ?? await getApplicationDocumentsDirectory();
+        }
+        final file = File('${targetDir.path}/$fileName');
+        await file.writeAsBytes(data);
+        final uri = Uri.file(file.path);
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text('File saved to: ${file.path}')),
+                ],
+              ),
+              backgroundColor: const Color(0xFF16A34A),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

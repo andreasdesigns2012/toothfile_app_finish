@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application_3/delete_account_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,6 +19,8 @@ class _SettingsTabState extends State<SettingsTab> {
   String _userid = 'U';
   String _useremail = 'email@example.com';
   String _createdAt = '0000-00-00';
+  String? _downloadPath;
+  bool _updatingDownloadPath = false;
 
   @override
   void initState() {
@@ -27,7 +33,71 @@ class _SettingsTabState extends State<SettingsTab> {
     _useremail = user?.email ?? 'email';
     _userid = user?.id ?? 'uid';
     _createdAt = user?.createdAt ?? '0000-00-00';
+    _loadDownloadPath();
     super.initState();
+  }
+
+  Future<void> _loadDownloadPath() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString('download_path');
+    if (saved != null && saved.isNotEmpty) {
+      setState(() => _downloadPath = saved);
+      return;
+    }
+    try {
+      final downloadsDir = await getDownloadsDirectory();
+      setState(() => _downloadPath = downloadsDir?.path);
+    } catch (_) {
+      final docs = await getApplicationDocumentsDirectory();
+      setState(() => _downloadPath = docs.path);
+    }
+  }
+
+  Future<void> _pickDownloadDirectory() async {
+    setState(() => _updatingDownloadPath = true);
+    try {
+      String? picked;
+      final isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+      if (isIOS) {
+        // iOS does not support directory picking; use app documents
+        final docs = await getApplicationDocumentsDirectory();
+        picked = docs.path;
+      } else {
+        picked = await FilePicker.platform.getDirectoryPath();
+      }
+      if (picked != null && picked.isNotEmpty) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('download_path', picked);
+        setState(() => _downloadPath = picked);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+                SizedBox(width: 12),
+                Text('Download folder updated'),
+              ],
+            ),
+            backgroundColor: const Color(0xFF16A34A),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update folder: $e'),
+          backgroundColor: const Color(0xFFEF4444),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _updatingDownloadPath = false);
+    }
   }
 
   @override
@@ -78,8 +148,6 @@ class _SettingsTabState extends State<SettingsTab> {
                 style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
               ),
               const SizedBox(height: 20),
-
-              // Edit Profile Section
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -453,6 +521,139 @@ class _SettingsTabState extends State<SettingsTab> {
                   ],
                 ),
               ),
+
+              const SizedBox(height: 20),
+
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFDCFCE7),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.folder_rounded,
+                            color: Color(0xFF16A34A),
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Files',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF020817),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Configure where downloaded files are saved',
+                      style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFDBEAFE),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.download_rounded,
+                              color: Color(0xFF2563EB),
+                              size: 18,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Download Folder',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF64748B),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _downloadPath ?? 'Loading... ',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF020817),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          ElevatedButton.icon(
+                            onPressed: _updatingDownloadPath
+                                ? null
+                                : _pickDownloadDirectory,
+                            icon: const Icon(
+                              Icons.edit_location_alt_rounded,
+                              size: 18,
+                            ),
+                            label: const Text(
+                              'Change',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2563EB),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               const SizedBox(height: 20),
 
               // Account Information Section

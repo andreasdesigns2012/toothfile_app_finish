@@ -1,0 +1,49 @@
+name: windows-app-build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          architecture: x64
+
+      - run: flutter config --enable-windows-desktop
+
+      - run: flutter pub get
+
+      - run: flutter build windows --release
+
+      - name: Package Windows app
+        shell: pwsh
+        run: |
+          $outDir = "build/windows/x64/runner/Release"
+          $zipPath = "$outDir/ToothFile-windows.zip"
+          if (Test-Path $zipPath) { Remove-Item $zipPath }
+          Compress-Archive -Path "$outDir/*" -DestinationPath $zipPath
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ToothFile-windows-zip
+          path: build/windows/x64/runner/Release/ToothFile-windows.zip
+          if-no-files-found: error
+
+      - name: Upload Windows release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/windows/x64/runner/Release/ToothFile-windows.zip
+          tag: build-${{ github.run_number }}-windows
+          release_name: ToothFile Windows build ${{ github.run_number }}
+          overwrite: true
+          body: Automated Windows app build

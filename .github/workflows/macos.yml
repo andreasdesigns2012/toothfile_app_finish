@@ -1,0 +1,42 @@
+name: macos-app-build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          architecture: arm64
+
+      - run: flutter pub get
+
+      - run: flutter build macos --release
+
+      - run: zip -qq -r -9 ToothFile-macos.zip Runner.app
+        working-directory: build/macos/Build/Products/Release
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ToothFile-macos-zip
+          path: build/macos/Build/Products/Release/ToothFile-macos.zip
+          if-no-files-found: error
+
+      - name: Upload macOS release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/macos/Build/Products/Release/ToothFile-macos.zip
+          tag: build-${{ github.run_number }}-macos
+          release_name: ToothFile macOS build ${{ github.run_number }}
+          overwrite: true
+          body: Automated macOS app build

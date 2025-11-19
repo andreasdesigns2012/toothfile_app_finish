@@ -44,6 +44,18 @@ class _SettingsTabState extends State<SettingsTab> {
       setState(() => _downloadPath = saved);
       return;
     }
+    final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+    final isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+    if (isAndroid) {
+      final ext = await getExternalStorageDirectory();
+      setState(() => _downloadPath = ext?.path);
+      return;
+    }
+    if (isIOS) {
+      final docs = await getApplicationDocumentsDirectory();
+      setState(() => _downloadPath = docs.path);
+      return;
+    }
     try {
       final downloadsDir = await getDownloadsDirectory();
       setState(() => _downloadPath = downloadsDir?.path);
@@ -57,13 +69,25 @@ class _SettingsTabState extends State<SettingsTab> {
     setState(() => _updatingDownloadPath = true);
     try {
       String? picked;
+      final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
       final isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
       if (isIOS) {
-        // iOS does not support directory picking; use app documents
         final docs = await getApplicationDocumentsDirectory();
         picked = docs.path;
+      } else if (isAndroid) {
+        final ext = await getExternalStorageDirectory();
+        picked = ext?.path;
       } else {
         picked = await FilePicker.platform.getDirectoryPath();
+      }
+      if (kIsWeb && (picked == null || picked.isEmpty)) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Browser controls download location on Web'),
+            backgroundColor: Color(0xFF64748B),
+          ),
+        );
       }
       if (picked != null && picked.isNotEmpty) {
         final prefs = await SharedPreferences.getInstance();

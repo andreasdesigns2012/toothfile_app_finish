@@ -13,7 +13,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          architecture: x64
+          architecture: arm64
       - run: flutter pub get
       
 
@@ -31,6 +31,13 @@ jobs:
       - name: Zip output
         run: zip -qq -r -9 FlutterIpaExport.ipa Payload
         working-directory: build/ios/iphoneos
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FlutterIpaExport-ipa
+          path: build/ios/iphoneos/FlutterIpaExport.ipa
+          if-no-files-found: error
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2

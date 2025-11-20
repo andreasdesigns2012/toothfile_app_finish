@@ -21,6 +21,7 @@ class _SettingsTabState extends State<SettingsTab> {
   String _createdAt = '0000-00-00';
   String? _downloadPath;
   bool _updatingDownloadPath = false;
+  bool _openLocationAfterDownload = false;
 
   @override
   void initState() {
@@ -39,13 +40,13 @@ class _SettingsTabState extends State<SettingsTab> {
 
   Future<void> _loadDownloadPath() async {
     final prefs = await SharedPreferences.getInstance();
+    setState(() => _openLocationAfterDownload = prefs.getBool('open_download_location') ?? false);
     final saved = prefs.getString('download_path');
     if (saved != null && saved.isNotEmpty) {
       setState(() => _downloadPath = saved);
       return;
     }
-    final isAndroid =
-        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+    final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
     final isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
     if (isAndroid) {
       final ext = await getExternalStorageDirectory();
@@ -70,8 +71,7 @@ class _SettingsTabState extends State<SettingsTab> {
     setState(() => _updatingDownloadPath = true);
     try {
       String? picked;
-      final isAndroid =
-          !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+      final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
       final isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
       if (isIOS) {
         final docs = await getApplicationDocumentsDirectory();
@@ -542,65 +542,6 @@ class _SettingsTabState extends State<SettingsTab> {
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFDCFCE7),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.folder_open_rounded,
-                              color: Color(0xFF16A34A),
-                              size: 18,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Open folder after download',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xFF64748B),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  'Show the downloaded file in the file browser',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF020817),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Switch(
-                            value: false,
-                            onChanged: (v) async {
-                              final prefs =
-                                  await SharedPreferences.getInstance();
-                              await prefs.setBool('open_download_location', v);
-                            },
-                            activeColor: const Color(0xFF16A34A),
-                          ),
-                        ],
                       ),
                     ),
                   ],

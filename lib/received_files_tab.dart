@@ -514,7 +514,6 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
             .download(path);
         final prefs = await SharedPreferences.getInstance();
         final prefPath = prefs.getString('download_path');
-        final openLocation = prefs.getBool('open_download_location') ?? false;
         Directory targetDir;
         if (prefPath != null && prefPath.isNotEmpty) {
           targetDir = Directory(prefPath);
@@ -533,17 +532,7 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
         }
         final file = File('${targetDir.path}/$fileName');
         await file.writeAsBytes(data);
-        if (openLocation) {
-          try {
-            if (Platform.isMacOS) {
-              await Process.run('open', ['-R', file.path]);
-            } else if (Platform.isWindows) {
-              await Process.run('explorer', ['/select,', file.path]);
-            } else if (Platform.isLinux) {
-              await Process.run('xdg-open', [targetDir.path]);
-            }
-          } catch (_) {}
-        }
+        // Do not auto-open file location
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

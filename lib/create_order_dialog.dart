@@ -352,13 +352,18 @@ class _CreateOrderDialogState extends State<CreateOrderDialog> {
   }
 
   Future<void> _pickFiles() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
-    );
-    if (result != null) {
-      setState(() {
-        _selectedFiles = result.files;
-      });
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        allowMultiple: true,
+        withData: true,
+      );
+      if (result != null) {
+        setState(() {
+          _selectedFiles = result.files;
+        });
+      }
+    } catch (e) {
+      print('Error picking files: $e');
     }
   }
 

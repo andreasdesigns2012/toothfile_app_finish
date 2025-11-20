@@ -526,6 +526,9 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
             downloadsDir = await getDownloadsDirectory();
           } catch (_) {}
           targetDir = downloadsDir ?? await getApplicationDocumentsDirectory();
+          if (!targetDir.existsSync()) {
+            targetDir.createSync(recursive: true);
+          }
         }
         final file = File('${targetDir.path}/$fileName');
         await file.writeAsBytes(data);

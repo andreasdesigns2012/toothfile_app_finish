@@ -348,8 +348,8 @@ class _SendFilesDialogState extends State<SendFilesDialog> {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         allowMultiple: true,
+        withData: true,
       );
-
       if (result != null) {
         setState(() {
           _pickedFiles = result.files;

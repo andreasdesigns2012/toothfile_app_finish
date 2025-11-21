@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_application_3/invite_collaborator_dialog.dart';
 import 'package:flutter_application_3/main.dart';
@@ -362,37 +363,41 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
 
           // Welcome Section
-          if (MediaQuery.of(context).size.width >= 600)
-            Container(
-              width: double.infinity,
-              color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome back, $_userName!',
-                    style: const TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF020817),
-                      letterSpacing: -0.5,
-                      height: 1.2,
-                    ),
+          (!kIsWeb &&
+                  (defaultTargetPlatform == TargetPlatform.windows ||
+                      defaultTargetPlatform == TargetPlatform.macOS ||
+                      defaultTargetPlatform == TargetPlatform.linux))
+              ? Container(
+            width: double.infinity,
+            color: Colors.white,
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Welcome back, $_userName!',
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF020817),
+                    letterSpacing: -0.5,
+                    height: 1.2,
                   ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Manage your files and collaborate with dental technicians',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF64748B),
-                      height: 1.4,
-                    ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Manage your files and collaborate with dental technicians',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF64748B),
+                    height: 1.4,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          )
+              : const SizedBox.shrink(),
 
           // Navigation Tabs
           Container(

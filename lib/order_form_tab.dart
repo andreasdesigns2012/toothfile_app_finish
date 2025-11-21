@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_application_3/create_order_dialog.dart';
-import 'package:flutter_application_3/edit_order_dialog.dart';
+import 'package:toothfile/create_order_dialog.dart';
+import 'package:toothfile/edit_order_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
 import 'package:path/path.dart' as p;
-import 'package:flutter_application_3/order_model.dart';
+import 'package:toothfile/order_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderFormTab extends StatefulWidget {

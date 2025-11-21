@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:path_drawing/path_drawing.dart';
-import 'package:flutter_application_3/Dental%20Chart/svg.dart';
+import 'package:toothfile/Dental%20Chart/svg.dart';
 import 'package:xml/xml.dart';
 
 typedef Data = ({Size size, Map<String, Tooth> teeth});

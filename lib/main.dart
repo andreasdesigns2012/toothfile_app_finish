@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_application_3/dashboard_page.dart';
+import 'package:toothfile/dashboard_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_application_3/supabase_auth_service.dart';
+import 'package:toothfile/supabase_auth_service.dart';
 
 // Optional local notifications for mobile platforms only
 // Removed global plugin setup on desktop to avoid unsupported initialization

@@ -1,4 +1,4 @@
-import 'package:flutter_application_3/send_files_page.dart';
+import 'package:toothfile/send_files_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -181,7 +181,8 @@ class _SendFilesTabState extends State<SendFilesTab> {
 
     return Container(
       color: const Color(0xFFF8FAFC),
-      child: SafeArea(top: false,
+      child: SafeArea(
+        top: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

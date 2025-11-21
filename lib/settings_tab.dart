@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_application_3/delete_account_dialog.dart';
+import 'package:toothfile/delete_account_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SettingsTab extends StatefulWidget {
@@ -40,13 +40,17 @@ class _SettingsTabState extends State<SettingsTab> {
 
   Future<void> _loadDownloadPath() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() => _openLocationAfterDownload = prefs.getBool('open_download_location') ?? false);
+    setState(
+      () => _openLocationAfterDownload =
+          prefs.getBool('open_download_location') ?? false,
+    );
     final saved = prefs.getString('download_path');
     if (saved != null && saved.isNotEmpty) {
       setState(() => _downloadPath = saved);
       return;
     }
-    final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+    final isAndroid =
+        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
     final isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
     if (isAndroid) {
       final ext = await getExternalStorageDirectory();
@@ -71,7 +75,8 @@ class _SettingsTabState extends State<SettingsTab> {
     setState(() => _updatingDownloadPath = true);
     try {
       String? picked;
-      final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+      final isAndroid =
+          !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
       final isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
       if (isIOS) {
         final docs = await getApplicationDocumentsDirectory();
@@ -133,7 +138,8 @@ class _SettingsTabState extends State<SettingsTab> {
 
     return Container(
       color: const Color(0xFFF8FAFC),
-      child: SafeArea(top: false,
+      child: SafeArea(
+        top: false,
         child: SingleChildScrollView(
           padding: EdgeInsets.all(isMobile ? 16 : 24),
           child: Column(

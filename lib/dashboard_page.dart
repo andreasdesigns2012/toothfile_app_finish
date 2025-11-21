@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_application_3/invite_collaborator_dialog.dart';
-import 'package:flutter_application_3/main.dart';
-import 'package:flutter_application_3/supabase_auth_service.dart';
-import 'package:flutter_application_3/received_files_tab.dart';
-import 'package:flutter_application_3/send_files_tab.dart';
-import 'package:flutter_application_3/file_tracker_tab.dart';
-import 'package:flutter_application_3/requests_tab.dart';
-import 'package:flutter_application_3/directory_tab.dart';
-import 'package:flutter_application_3/order_form_tab.dart';
-import 'package:flutter_application_3/settings_tab.dart';
+import 'package:toothfile/invite_collaborator_dialog.dart';
+import 'package:toothfile/main.dart';
+import 'package:toothfile/supabase_auth_service.dart';
+import 'package:toothfile/received_files_tab.dart';
+import 'package:toothfile/send_files_tab.dart';
+import 'package:toothfile/file_tracker_tab.dart';
+import 'package:toothfile/requests_tab.dart';
+import 'package:toothfile/directory_tab.dart';
+import 'package:toothfile/order_form_tab.dart';
+import 'package:toothfile/settings_tab.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});

@@ -181,7 +181,7 @@ class _SendFilesTabState extends State<SendFilesTab> {
 
     return Container(
       color: const Color(0xFFF8FAFC),
-      child: SafeArea(
+      child: SafeArea(top: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -248,7 +248,7 @@ class _ReceivedFilesTabState extends State<ReceivedFilesTab> {
 
     return Container(
       color: const Color(0xFFF8FAFC),
-      child: SafeArea(
+      child: SafeArea(top: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

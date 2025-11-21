@@ -133,7 +133,7 @@ class _SettingsTabState extends State<SettingsTab> {
 
     return Container(
       color: const Color(0xFFF8FAFC),
-      child: SafeArea(
+      child: SafeArea(top: false,
         child: SingleChildScrollView(
           padding: EdgeInsets.all(isMobile ? 16 : 24),
           child: Column(

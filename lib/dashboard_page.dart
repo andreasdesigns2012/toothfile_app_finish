@@ -423,6 +423,7 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
             ),
           ),
+          const SizedBox(height: 3),
 
           // Divider
           Container(height: 1, color: const Color(0xFFE2E8F0)),

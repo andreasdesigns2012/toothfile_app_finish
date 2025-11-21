@@ -273,6 +273,11 @@ class _DashboardPageState extends State<DashboardPage> {
       body: Column(
         children: [
           // Header
+          (!kIsWeb &&
+                  (defaultTargetPlatform == TargetPlatform.android ||
+                      defaultTargetPlatform == TargetPlatform.iOS))
+              ? const SizedBox(height: 20)
+              : const SizedBox.shrink(),
           Container(
             color: Colors.white,
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
@@ -368,35 +373,35 @@ class _DashboardPageState extends State<DashboardPage> {
                       defaultTargetPlatform == TargetPlatform.macOS ||
                       defaultTargetPlatform == TargetPlatform.linux))
               ? Container(
-            width: double.infinity,
-            color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Welcome back, $_userName!',
-                  style: const TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF020817),
-                    letterSpacing: -0.5,
-                    height: 1.2,
+                  width: double.infinity,
+                  color: Colors.white,
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome back, $_userName!',
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF020817),
+                          letterSpacing: -0.5,
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Manage your files and collaborate with dental technicians',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF64748B),
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Manage your files and collaborate with dental technicians',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF64748B),
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          )
+                )
               : const SizedBox.shrink(),
 
           // Navigation Tabs

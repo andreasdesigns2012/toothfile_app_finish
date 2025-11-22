@@ -22,6 +22,7 @@ class _SettingsTabState extends State<SettingsTab> {
   String? _downloadPath;
   bool _updatingDownloadPath = false;
   bool _openLocationAfterDownload = false;
+  String? _selectedAppIcon;
 
   @override
   void initState() {
@@ -43,6 +44,10 @@ class _SettingsTabState extends State<SettingsTab> {
     setState(
       () => _openLocationAfterDownload =
           prefs.getBool('open_download_location') ?? false,
+    );
+    setState(
+      () => _selectedAppIcon =
+          prefs.getString('app_icon_asset') ?? 'assets/logo.png',
     );
     final saved = prefs.getString('download_path');
     if (saved != null && saved.isNotEmpty) {
@@ -69,6 +74,27 @@ class _SettingsTabState extends State<SettingsTab> {
       final docs = await getApplicationDocumentsDirectory();
       setState(() => _downloadPath = docs.path);
     }
+  }
+
+  Future<void> _setAppIcon(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('app_icon_asset', path);
+    setState(() => _selectedAppIcon = path);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+            SizedBox(width: 12),
+            Text('App icon updated'),
+          ],
+        ),
+        backgroundColor: const Color(0xFF16A34A),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
   }
 
   Future<void> _pickDownloadDirectory() async {

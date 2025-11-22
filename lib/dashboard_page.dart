@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:toothfile/invite_collaborator_dialog.dart';
 import 'package:toothfile/main.dart';
@@ -284,14 +285,22 @@ class _DashboardPageState extends State<DashboardPage> {
             child: Row(
               children: [
                 // Logo and Title
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2563EB),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Image.asset('assets/logo.png', width: 20, height: 20),
+                FutureBuilder<SharedPreferences>(
+                  future: SharedPreferences.getInstance(),
+                  builder: (context, snapshot) {
+                    final iconPath = snapshot.hasData
+                        ? (snapshot.data!.getString('app_icon_asset') ?? 'assets/logo.png')
+                        : 'assets/logo.png';
+                    return Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2563EB),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Image.asset(iconPath, width: 20, height: 20),
+                    );
+                  },
                 ),
                 const SizedBox(width: 12),
                 Column(

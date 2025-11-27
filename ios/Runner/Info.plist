@@ -57,5 +57,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NFCReaderUsageDescription</key>
+	<string>We use NFC to write order tags with secure metadata.</string>
 </dict>
 </plist>

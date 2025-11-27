@@ -10,6 +10,8 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:toothfile/order_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nfc_manager/nfc_manager.dart';
+import 'package:uuid/uuid.dart';
 
 class OrderFormTab extends StatefulWidget {
   const OrderFormTab({super.key});
@@ -401,7 +403,8 @@ class _OrderFormTabState extends State<OrderFormTab> {
 
     return Container(
       color: const Color(0xFFF8FAFC),
-      child: SafeArea(top: false,
+      child: SafeArea(
+        top: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -511,6 +514,56 @@ class _OrderFormTabState extends State<OrderFormTab> {
                           contentPadding: EdgeInsets.symmetric(
                             vertical: 16,
                             horizontal: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFFE2E8F0),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {},
+                        borderRadius: BorderRadius.circular(12),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(
+                                Icons.contactless_outlined,
+                                size: 20,
+                                color: Color(0xFF0F172A),
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'Import from NFC',
+                                style: TextStyle(
+                                  color: Color(0xFF0F172A),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -715,6 +768,56 @@ class OrderCard extends StatelessWidget {
     required this.onView,
   });
 
+  Future<void> _writeNfcTag(BuildContext context, String orderId) async {
+    try {
+      if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('NFC writing is supported on mobile only')),
+        );
+        return;
+      }
+      if (!await NfcManager.instance.isAvailable()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('NFC not available on this device')),
+        );
+        return;
+      }
+
+      final password = const Uuid().v4().replaceAll('-', '').substring(0, 12);
+      final payloadJson = '{"orderId":"$orderId","password":"$password"}';
+
+      await NfcManager.instance.startSession(onDiscovered: (tag) async {
+        final ndef = Ndef.from(tag);
+        if (ndef == null || !(ndef.isWritable ?? false)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Tag is not NDEF writable')),
+          );
+          await NfcManager.instance.stopSession(errorMessage: 'Not NDEF');
+          return;
+        }
+        final message = NdefMessage([
+          NdefRecord.createText(payloadJson),
+        ]);
+        try {
+          await ndef.write(message);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Wrote order info to NFC tag')),
+          );
+          await NfcManager.instance.stopSession();
+        } catch (e) {
+          await NfcManager.instance.stopSession(errorMessage: 'Write failed');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('NFC write failed: $e')),
+          );
+        }
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('NFC error: $e')),
+      );
+    }
+  }
+
   Widget _buildFileChip(BuildContext context, String fileUrl) {
     final fileName = Uri.parse(fileUrl).pathSegments.last;
     return Container(
@@ -889,6 +992,27 @@ class OrderCard extends StatelessWidget {
                 ),
                 Row(
                   children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFFE2E8F0),
+                          width: 1,
+                        ),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.contactless_outlined,
+                          size: 18,
+                          color: Color(0xFF0F172A),
+                        ),
+                        onPressed: () => _writeNfcTag(context, order.id),
+                        padding: const EdgeInsets.all(8),
+                        constraints: const BoxConstraints(),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     Container(
                       decoration: BoxDecoration(
                         color: const Color(0xFFDBEAFE),

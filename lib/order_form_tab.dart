@@ -12,6 +12,7 @@ import 'package:toothfile/order_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:convert';
 
 class OrderFormTab extends StatefulWidget {
   const OrderFormTab({super.key});
@@ -38,6 +39,131 @@ class _OrderFormTabState extends State<OrderFormTab> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _importOrderFromNfc() async {
+    try {
+      if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('NFC import supported on mobile only')),
+        );
+        return;
+      }
+      if (!await NfcManager.instance.isAvailable()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('NFC not available on this device')),
+        );
+        return;
+      }
+
+      await NfcManager.instance.startSession(
+        alertMessage: 'Hold the NFC tag near the device',
+        onDiscovered: (tag) async {
+          final ndef = Ndef.from(tag);
+          if (ndef == null) {
+            await NfcManager.instance.stopSession(errorMessage: 'No NDEF');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Tag does not support NDEF')),
+            );
+            return;
+          }
+
+          NdefMessage? message;
+          try {
+            message = await ndef.read();
+          } catch (_) {
+            message = ndef.cachedMessage;
+          }
+          if (message == null || message.records.isEmpty) {
+            await NfcManager.instance.stopSession(errorMessage: 'Empty tag');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('No data found on tag')),
+            );
+            return;
+          }
+
+          String? jsonText;
+          for (final r in message.records) {
+            final isMime = String.fromCharCodes(r.type) == 'application/json';
+            if (isMime) {
+              jsonText = utf8.decode(r.payload);
+              break;
+            }
+          }
+
+          if (jsonText == null) {
+            await NfcManager.instance.stopSession(errorMessage: 'No JSON payload');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('No JSON payload found on tag')),
+            );
+            return;
+          }
+
+          Map<String, dynamic> data;
+          try {
+            data = json.decode(jsonText) as Map<String, dynamic>;
+          } catch (e) {
+            await NfcManager.instance.stopSession(errorMessage: 'Invalid JSON');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Invalid tag data: $e')),
+            );
+            return;
+          }
+
+          final orderId = data['orderId']?.toString();
+          if (orderId == null || orderId.isEmpty) {
+            await NfcManager.instance.stopSession(errorMessage: 'Missing orderId');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Tag missing orderId')),
+            );
+            return;
+          }
+
+          try {
+            final original = await supabase
+                .from('orders')
+                .select()
+                .eq('id', orderId)
+                .single();
+
+            final user = supabase.auth.currentUser;
+            if (user == null) {
+              await NfcManager.instance.stopSession(errorMessage: 'No user');
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Please sign in to import order')),
+              );
+              return;
+            }
+
+            final copy = {
+              'user_id': user.id,
+              'customer_name': original['customer_name'],
+              'technician_name': original['technician_name'],
+              'tooth_color': original['tooth_color'],
+              'selected_teeth': original['selected_teeth'],
+              'details': original['details'],
+              'order_files': original['order_files'],
+            };
+
+            await supabase.from('orders').insert(copy);
+            await NfcManager.instance.stopSession();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Order imported from NFC')),
+            );
+            await _fetchOrders();
+          } catch (e) {
+            await NfcManager.instance.stopSession(errorMessage: 'Import failed');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Import failed: $e')),
+            );
+          }
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('NFC error: $e')),
+      );
+    }
   }
 
   Future<void> _viewFile(BuildContext context, String fileUrl) async {
@@ -539,7 +665,7 @@ class _OrderFormTabState extends State<OrderFormTab> {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        onTap: () {},
+                        onTap: _importOrderFromNfc,
                         borderRadius: BorderRadius.circular(12),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
@@ -786,31 +912,37 @@ class OrderCard extends StatelessWidget {
       final password = const Uuid().v4().replaceAll('-', '').substring(0, 12);
       final payloadJson = '{"orderId":"$orderId","password":"$password"}';
 
-      await NfcManager.instance.startSession(onDiscovered: (tag) async {
-        final ndef = Ndef.from(tag);
-        if (ndef == null || !(ndef.isWritable ?? false)) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Tag is not NDEF writable')),
-          );
-          await NfcManager.instance.stopSession(errorMessage: 'Not NDEF');
-          return;
-        }
-        final message = NdefMessage([
-          NdefRecord.createText(payloadJson),
-        ]);
-        try {
-          await ndef.write(message);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Wrote order info to NFC tag')),
-          );
-          await NfcManager.instance.stopSession();
-        } catch (e) {
-          await NfcManager.instance.stopSession(errorMessage: 'Write failed');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('NFC write failed: $e')),
-          );
-        }
-      });
+      await NfcManager.instance.startSession(
+        alertMessage: 'Hold the NFC tag near the device',
+        onDiscovered: (tag) async {
+          final ndef = Ndef.from(tag);
+          final message = NdefMessage([
+            NdefRecord.createMime(
+              'application/json',
+              Uint8List.fromList(utf8.encode(payloadJson)),
+            ),
+          ]);
+          if (ndef == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Tag does not support NDEF')),
+            );
+            await NfcManager.instance.stopSession(errorMessage: 'No NDEF');
+            return;
+          }
+          try {
+            await ndef.write(message);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Wrote order info to NFC tag')),
+            );
+            await NfcManager.instance.stopSession();
+          } catch (e) {
+            await NfcManager.instance.stopSession(errorMessage: 'Write failed');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('NFC write failed: $e')),
+            );
+          }
+        },
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('NFC error: $e')),

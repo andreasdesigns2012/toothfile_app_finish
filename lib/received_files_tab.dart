@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'forward_dialog.dart';
 
 class ReceivedFilesTab extends StatefulWidget {
   const ReceivedFilesTab({super.key});
@@ -49,6 +50,7 @@ class _ReceivedFilesTabState extends State<ReceivedFilesTab> {
   }
 
   Future<void> _fetchReceivedFiles() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -79,16 +81,19 @@ class _ReceivedFilesTabState extends State<ReceivedFilesTab> {
         filesWithSenderInfo.add(file);
       }
 
+      if (!mounted) return;
       setState(() {
         _receivedFiles = filesWithSenderInfo;
         _filteredFiles = filesWithSenderInfo;
         _isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to load received files: ${e.toString()}';
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Failed to load received files: ${e.toString()}';
+          _isLoading = false;
+        });
+      }
       print('Error fetching received files: $e');
     }
   }
@@ -838,6 +843,32 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
                     padding: const EdgeInsets.all(8),
                     constraints: const BoxConstraints(),
                     tooltip: 'Delete File',
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.send_rounded,
+                      size: 20,
+                      color: Color(0xFF0F172A),
+                    ),
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => ForwardDialog(fileRecord: widget.file),
+                      );
+                    },
+                    padding: const EdgeInsets.all(8),
+                    constraints: const BoxConstraints(),
+                    tooltip: 'Forward File',
                   ),
                 ),
               ],

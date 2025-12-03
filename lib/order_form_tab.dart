@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:convert';
+import 'forward_dialog.dart';
 
 class OrderFormTab extends StatefulWidget {
   const OrderFormTab({super.key});
@@ -84,15 +85,20 @@ class _OrderFormTabState extends State<OrderFormTab> {
 
           String? jsonText;
           for (final r in message.records) {
-            final isMime = String.fromCharCodes(r.type) == 'application/json';
-            if (isMime) {
+            final isJsonMime =
+                r.typeNameFormat == NdefTypeNameFormat.media &&
+                String.fromCharCodes(r.type) == 'application/json';
+            if (isJsonMime) {
               jsonText = utf8.decode(r.payload);
               break;
             }
+            // Only accept application/json media records
           }
 
           if (jsonText == null) {
-            await NfcManager.instance.stopSession(errorMessage: 'No JSON payload');
+            await NfcManager.instance.stopSession(
+              errorMessage: 'No JSON payload',
+            );
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('No JSON payload found on tag')),
             );
@@ -104,15 +110,17 @@ class _OrderFormTabState extends State<OrderFormTab> {
             data = json.decode(jsonText) as Map<String, dynamic>;
           } catch (e) {
             await NfcManager.instance.stopSession(errorMessage: 'Invalid JSON');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Invalid tag data: $e')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Invalid tag data: $e')));
             return;
           }
 
           final orderId = data['orderId']?.toString();
           if (orderId == null || orderId.isEmpty) {
-            await NfcManager.instance.stopSession(errorMessage: 'Missing orderId');
+            await NfcManager.instance.stopSession(
+              errorMessage: 'Missing orderId',
+            );
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Tag missing orderId')),
             );
@@ -125,6 +133,20 @@ class _OrderFormTabState extends State<OrderFormTab> {
                 .select()
                 .eq('id', orderId)
                 .single();
+
+            final providedPassword = data['password']?.toString();
+            final originalPassword = original['nfc_password']?.toString();
+            if (originalPassword != null &&
+                providedPassword != null &&
+                originalPassword != providedPassword) {
+              await NfcManager.instance.stopSession(
+                errorMessage: 'Invalid credentials',
+              );
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Invalid NFC credentials')),
+              );
+              return;
+            }
 
             final user = supabase.auth.currentUser;
             if (user == null) {
@@ -143,6 +165,7 @@ class _OrderFormTabState extends State<OrderFormTab> {
               'selected_teeth': original['selected_teeth'],
               'details': original['details'],
               'order_files': original['order_files'],
+              'nfc_password': originalPassword,
             };
 
             await supabase.from('orders').insert(copy);
@@ -152,17 +175,19 @@ class _OrderFormTabState extends State<OrderFormTab> {
             );
             await _fetchOrders();
           } catch (e) {
-            await NfcManager.instance.stopSession(errorMessage: 'Import failed');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Import failed: $e')),
+            await NfcManager.instance.stopSession(
+              errorMessage: 'Import failed',
             );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Import failed: $e')));
           }
         },
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('NFC error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('NFC error: $e')));
     }
   }
 
@@ -322,8 +347,30 @@ class _OrderFormTabState extends State<OrderFormTab> {
           .select()
           .eq('user_id', user.id)
           .order('created_at', ascending: false);
+      final raw = (response as List);
 
-      final List<Order> fetchedOrders = (response as List).map((order) {
+      final forwardedIds = <String>{};
+      for (final o in raw) {
+        final fid = o['forwarded_from']?.toString();
+        if (fid != null && fid.isNotEmpty) forwardedIds.add(fid);
+      }
+
+      final namesById = <String, String>{};
+      if (forwardedIds.isNotEmpty) {
+        final profs = await supabase
+            .from('profiles')
+            .select('id,name,email')
+            .inFilter('id', forwardedIds.toList());
+        for (final p in (profs as List)) {
+          final pid = p['id']?.toString();
+          final name = (p['name']?.toString().trim().isNotEmpty == true)
+              ? p['name'].toString()
+              : (p['email']?.toString() ?? 'User');
+          if (pid != null) namesById[pid] = name;
+        }
+      }
+
+      final List<Order> fetchedOrders = raw.map((order) {
         final files = order['order_files'];
         List<String> parsedFiles = [];
 
@@ -344,6 +391,10 @@ class _OrderFormTabState extends State<OrderFormTab> {
           orderDetails: order['details']?.toString() ?? '',
           orderFiles: parsedFiles,
           createdAt: order['created_at']?.toString() ?? '',
+          nfcPassword: order['nfc_password']?.toString(),
+          forwardedFromId: order['forwarded_from']?.toString(),
+          forwardedFromName:
+              namesById[order['forwarded_from']?.toString() ?? ''],
         );
       }).toList();
 
@@ -674,21 +725,29 @@ class _OrderFormTabState extends State<OrderFormTab> {
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            children: const [
+                            children: [
                               Icon(
                                 Icons.contactless_outlined,
                                 size: 20,
                                 color: Color(0xFF0F172A),
                               ),
-                              SizedBox(width: 8),
-                              Text(
-                                'Import from NFC',
-                                style: TextStyle(
-                                  color: Color(0xFF0F172A),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                              if (!kIsWeb &&
+                                  (Platform.isWindows ||
+                                      Platform.isMacOS ||
+                                      Platform.isLinux))
+                                SizedBox(width: 8),
+                              if (!kIsWeb &&
+                                  (Platform.isWindows ||
+                                      Platform.isMacOS ||
+                                      Platform.isLinux))
+                                Text(
+                                  'Import from NFC',
+                                  style: TextStyle(
+                                    color: Color(0xFF0F172A),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                         ),
@@ -724,21 +783,29 @@ class _OrderFormTabState extends State<OrderFormTab> {
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            children: const [
+                            children: [
                               Icon(
                                 Icons.add_rounded,
                                 color: Colors.white,
                                 size: 20,
                               ),
-                              SizedBox(width: 8),
-                              Text(
-                                'New Order',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                              if (!kIsWeb &&
+                                  (Platform.isWindows ||
+                                      Platform.isMacOS ||
+                                      Platform.isLinux))
+                                SizedBox(width: 8),
+                              if (!kIsWeb &&
+                                  (Platform.isWindows ||
+                                      Platform.isMacOS ||
+                                      Platform.isLinux))
+                                Text(
+                                  'New Order',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                         ),
@@ -865,6 +932,9 @@ class Order {
   final String orderDetails;
   final List<String> orderFiles;
   final String createdAt;
+  final String? nfcPassword;
+  final String? forwardedFromId;
+  final String? forwardedFromName;
 
   Order({
     required this.id,
@@ -875,6 +945,9 @@ class Order {
     required this.orderDetails,
     required this.orderFiles,
     required this.createdAt,
+    this.nfcPassword,
+    this.forwardedFromId,
+    this.forwardedFromName,
   });
 }
 
@@ -894,11 +967,17 @@ class OrderCard extends StatelessWidget {
     required this.onView,
   });
 
-  Future<void> _writeNfcTag(BuildContext context, String orderId) async {
+  Future<void> _writeNfcTag(
+    BuildContext context,
+    String orderId, {
+    String? nfcPassword,
+  }) async {
     try {
       if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('NFC writing is supported on mobile only')),
+          const SnackBar(
+            content: Text('NFC writing is supported on mobile only'),
+          ),
         );
         return;
       }
@@ -909,7 +988,9 @@ class OrderCard extends StatelessWidget {
         return;
       }
 
-      final password = const Uuid().v4().replaceAll('-', '').substring(0, 12);
+      final password = (nfcPassword == null || nfcPassword.isEmpty)
+          ? const Uuid().v4().replaceAll('-', '').substring(0, 12)
+          : nfcPassword;
       final payloadJson = '{"orderId":"$orderId","password":"$password"}';
 
       await NfcManager.instance.startSession(
@@ -937,16 +1018,16 @@ class OrderCard extends StatelessWidget {
             await NfcManager.instance.stopSession();
           } catch (e) {
             await NfcManager.instance.stopSession(errorMessage: 'Write failed');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('NFC write failed: $e')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('NFC write failed: $e')));
           }
         },
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('NFC error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('NFC error: $e')));
     }
   }
 
@@ -1139,7 +1220,47 @@ class OrderCard extends StatelessWidget {
                           size: 18,
                           color: Color(0xFF0F172A),
                         ),
-                        onPressed: () => _writeNfcTag(context, order.id),
+                        onPressed: () => _writeNfcTag(
+                          context,
+                          order.id,
+                          nfcPassword: order.nfcPassword,
+                        ),
+                        padding: const EdgeInsets.all(8),
+                        constraints: const BoxConstraints(),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFFE2E8F0),
+                          width: 1,
+                        ),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.send_rounded,
+                          size: 18,
+                          color: Color(0xFF0F172A),
+                        ),
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => ForwardDialog(
+                              order: order,
+                              onForwarded: () =>
+                                  (context
+                                      .findAncestorStateOfType<
+                                        _OrderFormTabState
+                                      >()
+                                    ?.._fetchOrders()),
+                            ),
+                          );
+                        },
                         padding: const EdgeInsets.all(8),
                         constraints: const BoxConstraints(),
                       ),
@@ -1202,6 +1323,31 @@ class OrderCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
+
+            if (order.forwardedFromName != null &&
+                order.forwardedFromName!.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF7ED),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: const Color(0xFFFCD34D)),
+                ),
+                child: Text(
+                  'Forwarded from ${order.forwardedFromName}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFFB45309),
+                  ),
+                ),
+              ),
+            if (order.forwardedFromName != null &&
+                order.forwardedFromName!.isNotEmpty)
+              const SizedBox(height: 12),
 
             // Tooth Color
             Row(

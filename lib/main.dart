@@ -69,6 +69,8 @@ class AuthPage extends StatefulWidget {
 class _AuthPageState extends State<AuthPage> {
   bool _isSignInSelected = true;
   bool _isLoading = false;
+  bool _signInPasswordVisible = false;
+  bool _signUpPasswordVisible = false;
 
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -164,7 +166,7 @@ class _AuthPageState extends State<AuthPage> {
           const SizedBox(height: 8),
           TextField(
             controller: _passwordController,
-            obscureText: true,
+            obscureText: !_signInPasswordVisible,
             enabled: !_isLoading,
             decoration: InputDecoration(
               hintText: 'Enter your password',
@@ -175,10 +177,21 @@ class _AuthPageState extends State<AuthPage> {
               ),
               filled: true,
               fillColor: Colors.white,
-              suffixIcon: const Icon(
-                Icons.visibility_outlined,
-                color: Color(0xFF94A3B8),
-                size: 20,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _signInPasswordVisible
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  color: const Color(0xFF94A3B8),
+                  size: 20,
+                ),
+                onPressed: _isLoading
+                    ? null
+                    : () {
+                        setState(() {
+                          _signInPasswordVisible = !_signInPasswordVisible;
+                        });
+                      },
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -406,7 +419,7 @@ class _AuthPageState extends State<AuthPage> {
             const SizedBox(height: 8),
             TextField(
               controller: _passwordController,
-              obscureText: true,
+              obscureText: !_signUpPasswordVisible,
               enabled: !_isLoading,
               decoration: InputDecoration(
                 hintText: 'Create a password',
@@ -417,10 +430,21 @@ class _AuthPageState extends State<AuthPage> {
                 ),
                 filled: true,
                 fillColor: Colors.white,
-                suffixIcon: const Icon(
-                  Icons.visibility_outlined,
-                  color: Color(0xFF94A3B8),
-                  size: 20,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _signUpPasswordVisible
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: const Color(0xFF94A3B8),
+                    size: 20,
+                  ),
+                  onPressed: _isLoading
+                      ? null
+                      : () {
+                          setState(() {
+                            _signUpPasswordVisible = !_signUpPasswordVisible;
+                          });
+                        },
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),

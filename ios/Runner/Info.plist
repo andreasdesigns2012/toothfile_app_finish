@@ -57,7 +57,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>NFCReaderUsageDescription</key>
-	<string>We use NFC to write order tags with secure metadata.</string>
+  <key>NFCReaderUsageDescription</key>
+  <string>We use NFC to write order tags with secure metadata.</string>
+  <key>NSPhotoLibraryUsageDescription</key>
+  <string>Allow access to your photo library to upload images.</string>
+  <key>NSCameraUsageDescription</key>
+  <string>Allow using the camera to take and upload photos.</string>
 </dict>
 </plist>

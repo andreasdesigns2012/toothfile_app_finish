@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:toothfile/Dental Chart/tooth_selection.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:file_picker/file_picker.dart';
@@ -6,6 +7,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:uuid/uuid.dart';
 import 'package:archive/archive.dart';
+import 'package:image_picker/image_picker.dart';
 
 class SendFilesDialog extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -357,6 +359,140 @@ class _SendFilesDialogState extends State<SendFilesDialog> {
       }
     } catch (e) {
       print('Error picking files: $e');
+    }
+  }
+
+  Future<void> _pickFromGallery() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final List<XFile> images = await picker.pickMultiImage(imageQuality: 85);
+      if (images.isNotEmpty) {
+        final List<PlatformFile> platformFiles = [];
+        for (final x in images) {
+          final bytes = await x.readAsBytes();
+          platformFiles.add(
+            PlatformFile(
+              name: x.name,
+              size: bytes.length,
+              bytes: bytes,
+              path: x.path,
+            ),
+          );
+        }
+        setState(() {
+          _pickedFiles.addAll(platformFiles);
+        });
+      }
+    } catch (e) {
+      print('Error picking from gallery: $e');
+    }
+  }
+
+  Future<void> _takePhoto() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? photo = await picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 85,
+      );
+      if (photo != null) {
+        final bytes = await photo.readAsBytes();
+        final pf = PlatformFile(
+          name: photo.name,
+          size: bytes.length,
+          bytes: bytes,
+          path: photo.path,
+        );
+        setState(() {
+          _pickedFiles.add(pf);
+        });
+      }
+    } catch (e) {
+      print('Error taking photo: $e');
+    }
+  }
+
+  void _showUploadOptions() {
+    if (Platform.isIOS || Platform.isAndroid) {
+      showCupertinoModalPopup(
+        context: context,
+        builder: (context) {
+          return CupertinoTheme(
+            data: const CupertinoThemeData(brightness: Brightness.dark),
+            child: CupertinoActionSheet(
+              actions: [
+                CupertinoActionSheetAction(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await _pickFromGallery();
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('Photo Library'),
+                      Icon(CupertinoIcons.photo_on_rectangle),
+                    ],
+                  ),
+                ),
+                CupertinoActionSheetAction(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await _takePhoto();
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('Take Photo'),
+                      Icon(CupertinoIcons.camera),
+                    ],
+                  ),
+                ),
+                CupertinoActionSheetAction(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await _pickFiles();
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('Choose File'),
+                      Icon(CupertinoIcons.folder),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } else {
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (context) {
+          return Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.folder_open_rounded),
+                    title: const Text('Choose File'),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      await _pickFiles();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
     }
   }
 
@@ -834,7 +970,7 @@ class _SendFilesDialogState extends State<SendFilesDialog> {
 
                   // Pick Files Button
                   InkWell(
-                    onTap: _pickFiles,
+                    onTap: _showUploadOptions,
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
                       padding: const EdgeInsets.all(20),

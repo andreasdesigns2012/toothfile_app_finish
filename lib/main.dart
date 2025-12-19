@@ -275,10 +275,9 @@ class _AuthPageState extends State<AuthPage> {
 
                       if (response['success']) {
                         await PushNotificationService.ensurePermissionsAndSyncToken();
-                        // Navigate to root and let StreamBuilder handle showing Dashboard
-                        Navigator.of(context).pushAndRemoveUntil(
+                        _navigatorKey.currentState?.pushAndRemoveUntil(
                           MaterialPageRoute(
-                            builder: (context) => const MyApp(),
+                            builder: (context) => const DashboardPage(),
                           ),
                           (Route<dynamic> route) => false,
                         );
@@ -655,10 +654,9 @@ class _AuthPageState extends State<AuthPage> {
 
                           if (response['success']) {
                             await PushNotificationService.ensurePermissionsAndSyncToken();
-                            // Navigate to root and let StreamBuilder handle showing Dashboard
-                            Navigator.of(context).pushAndRemoveUntil(
+                            _navigatorKey.currentState?.pushAndRemoveUntil(
                               MaterialPageRoute(
-                                builder: (context) => const MyApp(),
+                                builder: (context) => const DashboardPage(),
                               ),
                               (Route<dynamic> route) => false,
                             );

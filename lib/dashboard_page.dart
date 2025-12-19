@@ -14,7 +14,8 @@ import 'package:toothfile/order_form_tab.dart';
 import 'package:toothfile/settings_tab.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  final int? initialIndex;
+  const DashboardPage({super.key, this.initialIndex});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -51,6 +52,7 @@ class _DashboardPageState extends State<DashboardPage> {
         'Role';
     _userEmail = user?.email ?? '';
     _userInitials = _userName.isNotEmpty ? _userName[0].toUpperCase() : 'U';
+    _selectedIndex = widget.initialIndex ?? 0;
   }
 
   @override

@@ -850,7 +850,10 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                    border: Border.all(
+                      color: const Color(0xFFE2E8F0),
+                      width: 1,
+                    ),
                   ),
                   child: IconButton(
                     icon: const Icon(
@@ -863,7 +866,8 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
                         context: context,
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
-                        builder: (context) => ForwardDialog(fileRecord: widget.file),
+                        builder: (context) =>
+                            ForwardDialog(fileRecord: widget.file),
                       );
                     },
                     padding: const EdgeInsets.all(8),

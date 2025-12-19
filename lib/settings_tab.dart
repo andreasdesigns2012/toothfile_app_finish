@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toothfile/delete_account_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:toothfile/push_notification_service.dart';
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -23,6 +24,11 @@ class _SettingsTabState extends State<SettingsTab> {
   bool _updatingDownloadPath = false;
   bool _openLocationAfterDownload = false;
   String? _selectedAppIcon;
+  bool _pushEnabled = false;
+  bool _notifFileReceived = true;
+  bool _notifFileTracker = true;
+  bool _notifConnectionRequests = true;
+  bool _notifConnectionAccepted = true;
 
   @override
   void initState() {
@@ -36,6 +42,8 @@ class _SettingsTabState extends State<SettingsTab> {
     _userid = user?.id ?? 'uid';
     _createdAt = user?.createdAt ?? '0000-00-00';
     _loadDownloadPath();
+    _loadPushEnabled();
+    _loadNotificationPrefs();
     super.initState();
   }
 
@@ -76,6 +84,23 @@ class _SettingsTabState extends State<SettingsTab> {
     }
   }
 
+  Future<void> _loadPushEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() => _pushEnabled = prefs.getBool('push_enabled') ?? false);
+  }
+
+  Future<void> _loadNotificationPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _notifFileReceived = prefs.getBool('notif_file_received') ?? true;
+      _notifFileTracker = prefs.getBool('notif_file_tracker') ?? true;
+      _notifConnectionRequests =
+          prefs.getBool('notif_connection_requests') ?? true;
+      _notifConnectionAccepted =
+          prefs.getBool('notif_connection_accepted') ?? true;
+    });
+  }
+
   Future<void> _setAppIcon(String path) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('app_icon_asset', path);
@@ -94,6 +119,176 @@ class _SettingsTabState extends State<SettingsTab> {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
+    );
+  }
+
+  Widget _buildPushCard() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.notifications_active_rounded,
+                color: Color(0xFF2563EB),
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Push Notifications',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+              const Spacer(),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Text(
+                'Status: ${_pushEnabled ? 'Enabled' : 'Not enabled'}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: _pushEnabled
+                      ? const Color(0xFF16A34A)
+                      : const Color(0xFFF59E0B),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              _pushEnabled
+                  ? Row(
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            await PushNotificationService.sendTestNotification();
+                          },
+                          icon: const Icon(
+                            Icons.notification_important_rounded,
+                            size: 18,
+                          ),
+                          label: const Text('Test Notification'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            side: const BorderSide(color: Color(0xFFE2E8F0)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        OutlinedButton(
+                          onPressed: () async {
+                            setState(() => _pushEnabled = false);
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setBool('push_enabled', false);
+                            await PushNotificationService.disableNotifications();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            side: const BorderSide(color: Color(0xFFE2E8F0)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Disable Push'),
+                        ),
+                      ],
+                    )
+                  : ElevatedButton(
+                      onPressed: () async {
+                        setState(() => _pushEnabled = true);
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool('push_enabled', true);
+                        await PushNotificationService.ensurePermissionsAndSyncToken();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Enable Push Notifications'),
+                    ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDisabledBanner() {
+    return Container(padding: const EdgeInsets.all(0.1));
+  }
+
+  Widget _buildPreferenceOptions() {
+    return Column(
+      children: [
+        _buildNotificationRow(
+          icon: Icons.folder_shared_rounded,
+          title: 'File Received',
+          subtitle: 'Notify when someone shares a file with you',
+          value: _notifFileReceived,
+          onChanged: (v) async {
+            setState(() => _notifFileReceived = v);
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('notif_file_received', v);
+          },
+        ),
+        const Divider(height: 24, color: Color(0xFFE2E8F0)),
+        _buildNotificationRow(
+          icon: Icons.visibility_rounded,
+          title: 'File Tracker',
+          subtitle: 'Notify when someone downloads your file',
+          value: _notifFileTracker,
+          onChanged: (v) async {
+            setState(() => _notifFileTracker = v);
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('notif_file_tracker', v);
+          },
+        ),
+        const Divider(height: 24, color: Color(0xFFE2E8F0)),
+        _buildNotificationRow(
+          icon: Icons.person_add_rounded,
+          title: 'Connection Requests',
+          subtitle: 'Notify about new connection requests',
+          value: _notifConnectionRequests,
+          onChanged: (v) async {
+            setState(() => _notifConnectionRequests = v);
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('notif_connection_requests', v);
+          },
+        ),
+        const Divider(height: 24, color: Color(0xFFE2E8F0)),
+        _buildNotificationRow(
+          icon: Icons.check_circle_rounded,
+          title: 'Connection Accepted',
+          subtitle: 'Notify when someone accepts your connection request',
+          value: _notifConnectionAccepted,
+          onChanged: (v) async {
+            setState(() => _notifConnectionAccepted = v);
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('notif_connection_accepted', v);
+          },
+        ),
+      ],
     );
   }
 
@@ -204,6 +399,58 @@ class _SettingsTabState extends State<SettingsTab> {
               const Text(
                 'Manage your account settings and preferences',
                 style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFDBEAFE),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.notifications_rounded,
+                            color: Color(0xFF2563EB),
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Notifications',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF020817),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    _buildPushCard(),
+                    const SizedBox(height: 16),
+                    _pushEnabled
+                        ? _buildPreferenceOptions()
+                        : _buildDisabledBanner(),
+                  ],
+                ),
               ),
               const SizedBox(height: 20),
               Container(

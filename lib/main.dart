@@ -1,15 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:toothfile/dashboard_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:toothfile/supabase_auth_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:toothfile/push_notification_service.dart';
 
 // Optional local notifications for mobile platforms only
 // Removed global plugin setup on desktop to avoid unsupported initialization
 
+final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb ||
+      (!kIsWeb &&
+          (defaultTargetPlatform == TargetPlatform.android ||
+              defaultTargetPlatform == TargetPlatform.iOS))) {
+    try {
+      await Firebase.initializeApp();
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    } catch (_) {}
+  }
 
   await Supabase.initialize(
     url: 'https://ikqsbkfnjamvkevsxqpr.supabase.co',
@@ -17,6 +32,7 @@ Future<void> main() async {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrcXNia2ZuamFtdmtldnN4cXByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAzNTUxMDMsImV4cCI6MjA2NTkzMTEwM30.fhRMXkOu8WAD6B_zMCe1xBI6E_Ql4pRzRnfJHZS7qPM',
   );
 
+  PushNotificationService.initialize(_navigatorKey);
   runApp(const MyApp());
 }
 
@@ -36,6 +52,7 @@ class _MyAppState extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2563EB)),
         useMaterial3: true,
       ),
+      navigatorKey: _navigatorKey,
       home: StreamBuilder<AuthState>(
         stream: SupabaseAuthService.authStateChanges,
         builder: (context, snapshot) {
@@ -257,6 +274,7 @@ class _AuthPageState extends State<AuthPage> {
                       });
 
                       if (response['success']) {
+                        await PushNotificationService.ensurePermissionsAndSyncToken();
                         // Navigate to root and let StreamBuilder handle showing Dashboard
                         Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(
@@ -636,6 +654,7 @@ class _AuthPageState extends State<AuthPage> {
                           });
 
                           if (response['success']) {
+                            await PushNotificationService.ensurePermissionsAndSyncToken();
                             // Navigate to root and let StreamBuilder handle showing Dashboard
                             Navigator.of(context).pushAndRemoveUntil(
                               MaterialPageRoute(

@@ -55,7 +55,11 @@ class PushNotificationService {
     final androidInit = const AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
-    final iosInit = const DarwinInitializationSettings();
+    final iosInit = const DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
     final windowsInit = const WindowsInitializationSettings(
       appUserModelId: 'com.toothfile.desktop',
       appName: 'ToothFile',
@@ -108,8 +112,56 @@ class PushNotificationService {
                   priority: Priority.high,
                   icon: '@mipmap/ic_launcher',
                 ),
-                iOS: const DarwinNotificationDetails(),
+                iOS: const DarwinNotificationDetails(
+                  presentAlert: true,
+                  presentSound: true,
+                  presentBadge: true,
+                ),
                 windows: _windowsDetails(),
+              ),
+              payload: payload,
+            );
+          }
+        } else {
+          final t = message.data['type']?.toString() ?? '';
+          String title = 'Notification';
+          String body = '';
+          String key = 'notif_file_received';
+          if (t == 'file_received') {
+            title = 'New file received';
+            body = 'You have a new shared file';
+            key = 'notif_file_received';
+          } else if (t == 'file_tracker') {
+            title = 'File downloaded';
+            body = 'Your file was downloaded';
+            key = 'notif_file_tracker';
+          } else if (t == 'connection_request') {
+            title = 'New connection request';
+            body = 'You have a new connection request';
+            key = 'notif_connection_requests';
+          } else if (t == 'connection_accepted') {
+            title = 'Connection accepted';
+            body = 'Your connection request was accepted';
+            key = 'notif_connection_accepted';
+          }
+          if (await _isAllowed(key)) {
+            await _flnp.show(
+              DateTime.now().millisecondsSinceEpoch,
+              title,
+              body,
+              const NotificationDetails(
+                android: AndroidNotificationDetails(
+                  'toothfile_channel',
+                  'Toothfile Notifications',
+                  importance: Importance.high,
+                  priority: Priority.high,
+                  icon: '@mipmap/ic_launcher',
+                ),
+                iOS: DarwinNotificationDetails(
+                  presentAlert: true,
+                  presentSound: true,
+                  presentBadge: true,
+                ),
               ),
               payload: payload,
             );
@@ -120,26 +172,21 @@ class PushNotificationService {
         _handleData(message.data);
       });
     } else {
-      if (!kIsWeb &&
-          (defaultTargetPlatform == TargetPlatform.windows ||
-              defaultTargetPlatform == TargetPlatform.macOS ||
-              defaultTargetPlatform == TargetPlatform.linux)) {
-        _authSub?.cancel();
-        _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((
-          state,
-        ) {
-          final session = state.session;
-          if (session?.user != null) {
-            _setupRealtimeFallback();
-            _startPolling();
-          } else {
-            _channel?.unsubscribe();
-            _channel = null;
-            _pollTimer?.cancel();
-            _pollTimer = null;
-          }
-        });
-      }
+      _authSub?.cancel();
+      _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((
+        state,
+      ) {
+        final session = state.session;
+        if (session?.user != null) {
+          _setupRealtimeFallback();
+          _startPolling();
+        } else {
+          _channel?.unsubscribe();
+          _channel = null;
+          _pollTimer?.cancel();
+          _pollTimer = null;
+        }
+      });
     }
   }
 

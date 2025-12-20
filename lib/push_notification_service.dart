@@ -86,6 +86,12 @@ class PushNotificationService {
     );
 
     if (_pushCapable) {
+      await FirebaseMessaging.instance
+          .setForegroundNotificationPresentationOptions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
       FirebaseMessaging.onMessage.listen((message) async {
         final notification = message.notification;
         final payload = jsonEncode(message.data);
@@ -191,8 +197,20 @@ class PushNotificationService {
   }
 
   static Future<void> ensurePermissionsAndSyncToken() async {
-    if (!_pushCapable) return;
-    await FirebaseMessaging.instance.requestPermission();
+    if (!_pushCapable) {
+      return;
+    }
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+    await _flnp
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
     final token = await FirebaseMessaging.instance.getToken();
     final client = Supabase.instance.client;
     final user = client.auth.currentUser;

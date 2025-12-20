@@ -85,15 +85,13 @@ class PushNotificationService {
       },
     );
 
-    try {
+    if (_pushCapable) {
       await FirebaseMessaging.instance
           .setForegroundNotificationPresentationOptions(
             alert: true,
             badge: true,
             sound: true,
           );
-    } catch (_) {}
-    if (_pushCapable) {
       FirebaseMessaging.onMessage.listen((message) async {
         final notification = message.notification;
         final payload = jsonEncode(message.data);
@@ -199,36 +197,28 @@ class PushNotificationService {
   }
 
   static Future<void> ensurePermissionsAndSyncToken() async {
+    if (!_pushCapable) {
+      return;
+    }
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
     await _flnp
         .resolvePlatformSpecificImplementation<
           IOSFlutterLocalNotificationsPlugin
         >()
         ?.requestPermissions(alert: true, badge: true, sound: true);
-    try {
-      await FirebaseMessaging.instance
-          .setForegroundNotificationPresentationOptions(
-            alert: true,
-            badge: true,
-            sound: true,
-          );
-    } catch (_) {}
-    if (_pushCapable) {
-      await FirebaseMessaging.instance.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-        provisional: false,
-      );
-      final token = await FirebaseMessaging.instance.getToken();
-      final client = Supabase.instance.client;
-      final user = client.auth.currentUser;
-      if (user != null) {
-        await client
-            .from('profiles')
-            .update({'fcm_token': token})
-            .eq('id', user.id);
-      }
-    }
+    final token = await FirebaseMessaging.instance.getToken();
+    final client = Supabase.instance.client;
+    final user = client.auth.currentUser;
+    if (user == null) return;
+    await client
+        .from('profiles')
+        .update({'fcm_token': token})
+        .eq('id', user.id);
   }
 
   static Future<void> disableNotifications() async {

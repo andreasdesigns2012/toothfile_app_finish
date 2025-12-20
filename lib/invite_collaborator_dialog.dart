@@ -36,18 +36,36 @@ class _InviteCollaboratorDialogState extends State<InviteCollaboratorDialog> {
     if (recipientEmail.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              Icon(Icons.warning_rounded, color: Colors.white, size: 20),
-              SizedBox(width: 12),
-              Text('Please enter a recipient email'),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Please enter a recipient email',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ),
             ],
           ),
           backgroundColor: const Color(0xFFF97316),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
           ),
+          margin: const EdgeInsets.all(16),
+          elevation: 4,
         ),
       );
       return;
@@ -63,31 +81,52 @@ class _InviteCollaboratorDialogState extends State<InviteCollaboratorDialog> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Row(
+              content: Row(
                 children: [
-                  Icon(Icons.error_outline, color: Colors.white, size: 20),
-                  SizedBox(width: 12),
-                  Text('User not logged in'),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.error_outline_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'User not logged in',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                 ],
               ),
               backgroundColor: const Color(0xFFEF4444),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
+              margin: const EdgeInsets.all(16),
+              elevation: 4,
             ),
           );
         }
         return;
       }
 
-      final inviterName = user.userMetadata?['name'] ??
+      final inviterName =
+          user.userMetadata?['name'] ??
           user.userMetadata?['full_name'] ??
           user.email ??
           'Unknown User';
 
       final inviterRole =
-          user.userMetadata?['role'] ?? user.userMetadata?['user_role'] ?? 'role';
+          user.userMetadata?['role'] ??
+          user.userMetadata?['user_role'] ??
+          'role';
       final inviterEmail = user.email!;
 
       final response = await http.post(
@@ -102,7 +141,9 @@ class _InviteCollaboratorDialogState extends State<InviteCollaboratorDialog> {
           'inviterEmail': inviterEmail,
           'inviterRole': inviterRole,
           'recipientEmail': recipientEmail,
-          'personalMessage': personalMessage.isNotEmpty ? personalMessage : null,
+          'personalMessage': personalMessage.isNotEmpty
+              ? personalMessage
+              : null,
         }),
       );
 
@@ -116,18 +157,36 @@ class _InviteCollaboratorDialogState extends State<InviteCollaboratorDialog> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Row(
+              content: Row(
                 children: [
-                  Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-                  SizedBox(width: 12),
-                  Text('Invitation sent successfully!'),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Invitation sent successfully!',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                 ],
               ),
               backgroundColor: const Color(0xFF16A34A),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
+              margin: const EdgeInsets.all(16),
+              elevation: 4,
             ),
           );
           Navigator.of(context).pop();
@@ -139,11 +198,23 @@ class _InviteCollaboratorDialogState extends State<InviteCollaboratorDialog> {
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.error_outline_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       'Failed to send invitation: ${errorBody['error'] ?? response.reasonPhrase}',
+                      style: const TextStyle(fontWeight: FontWeight.w500),
                     ),
                   ),
                 ],
@@ -151,8 +222,10 @@ class _InviteCollaboratorDialogState extends State<InviteCollaboratorDialog> {
               backgroundColor: const Color(0xFFEF4444),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
+              margin: const EdgeInsets.all(16),
+              elevation: 4,
             ),
           );
         }
@@ -166,16 +239,34 @@ class _InviteCollaboratorDialogState extends State<InviteCollaboratorDialog> {
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
                 const SizedBox(width: 12),
-                Expanded(child: Text('Error sending invitation: $e')),
+                Expanded(
+                  child: Text(
+                    'Error sending invitation: $e',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
               ],
             ),
             backgroundColor: const Color(0xFFEF4444),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
           ),
         );
       }
@@ -370,15 +461,11 @@ class _InviteCollaboratorDialogState extends State<InviteCollaboratorDialog> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE2E8F0),
-                        ),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE2E8F0),
-                        ),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -417,19 +504,16 @@ class _InviteCollaboratorDialogState extends State<InviteCollaboratorDialog> {
                     enabled: !_isLoading,
                     maxLines: 4,
                     decoration: InputDecoration(
-                      hintText: 'Hi! I\'d like to invite you to collaborate on ToothFile...',
+                      hintText:
+                          'Hi! I\'d like to invite you to collaborate on ToothFile...',
                       hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE2E8F0),
-                        ),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE2E8F0),
-                        ),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -443,7 +527,6 @@ class _InviteCollaboratorDialogState extends State<InviteCollaboratorDialog> {
                       contentPadding: const EdgeInsets.all(16),
                     ),
                   ),
-
                 ],
               ),
             ),

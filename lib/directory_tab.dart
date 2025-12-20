@@ -79,9 +79,40 @@ class _DirectoryTabState extends State<DirectoryTab> {
     } catch (e) {
       print('Error loading users: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error loading users: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Error loading users: $e',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
+          ),
+        );
       }
       setState(() {
         _isLoading = false;
@@ -257,12 +288,36 @@ class _DirectoryTabState extends State<DirectoryTab> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Connection request sent!'),
-            backgroundColor: const Color(0xFFF97316),
+            content: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Connection request sent!',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF16A34A),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
             ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
           ),
         );
       }
@@ -271,9 +326,40 @@ class _DirectoryTabState extends State<DirectoryTab> {
     } catch (e) {
       print('Error sending connection request: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error sending request: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Error sending request: $e',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
+          ),
+        );
       }
     }
   }
@@ -326,28 +412,87 @@ class _DirectoryTabState extends State<DirectoryTab> {
               const SizedBox(height: 16),
               ...['All Roles', 'dental', 'technician'].map((role) {
                 final isSelected = _selectedRole == role;
-                return ListTile(
-                  title: Text(
-                    role,
-                    style: TextStyle(
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.w400,
-                      color: isSelected
-                          ? const Color(0xFF2563EB)
-                          : const Color(0xFF020817),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 6,
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedRole = role;
+                        _filterUsers();
+                      });
+                      Navigator.pop(context);
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? const Color(0xFFEFF6FF)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? const Color(0xFFBFDBFE)
+                              : Colors.transparent,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFF2563EB)
+                                  : const Color(0xFFF1F5F9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              role == 'dental'
+                                  ? Icons.medical_services_rounded
+                                  : role == 'technician'
+                                  ? Icons.build_rounded
+                                  : Icons.people_alt_rounded,
+                              size: 16,
+                              color: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF64748B),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              role == 'dental'
+                                  ? 'Dental Practice'
+                                  : role == 'technician'
+                                  ? 'Dental Technician'
+                                  : 'All Roles',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                                color: isSelected
+                                    ? const Color(0xFF1E3A8A)
+                                    : const Color(0xFF0F172A),
+                              ),
+                            ),
+                          ),
+                          if (isSelected)
+                            const Icon(
+                              Icons.check_circle_rounded,
+                              color: Color(0xFF2563EB),
+                              size: 20,
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                  trailing: isSelected
-                      ? const Icon(Icons.check, color: Color(0xFF2563EB))
-                      : null,
-                  onTap: () {
-                    setState(() {
-                      _selectedRole = role;
-                      _filterUsers();
-                    });
-                    Navigator.pop(context);
-                  },
                 );
               }).toList(),
               const SizedBox(height: 10),
@@ -366,7 +511,8 @@ class _DirectoryTabState extends State<DirectoryTab> {
 
     return Container(
       color: const Color(0xFFF8FAFC),
-      child: SafeArea(top: false,
+      child: SafeArea(
+        top: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -455,9 +601,9 @@ class _DirectoryTabState extends State<DirectoryTab> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
@@ -469,11 +615,11 @@ class _DirectoryTabState extends State<DirectoryTab> {
                           prefixIcon: Icon(
                             Icons.search,
                             color: Color(0xFF94A3B8),
-                            size: 22,
+                            size: 20,
                           ),
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(
-                            vertical: 16,
+                            vertical: 14,
                             horizontal: 16,
                           ),
                         ),

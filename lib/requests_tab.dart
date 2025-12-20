@@ -66,16 +66,34 @@ class _RequestsTabState extends State<RequestsTab> {
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
                 const SizedBox(width: 12),
-                Expanded(child: Text('Error loading requests: $e')),
+                Expanded(
+                  child: Text(
+                    'Error loading requests: $e',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
               ],
             ),
             backgroundColor: const Color(0xFFEF4444),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
           ),
         );
       }
@@ -102,22 +120,36 @@ class _RequestsTabState extends State<RequestsTab> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Row(
+              content: Row(
                 children: [
-                  Icon(
-                    Icons.check_circle_rounded,
-                    color: Colors.white,
-                    size: 20,
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
-                  SizedBox(width: 12),
-                  Text('Connection request accepted!'),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Connection request accepted!',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                 ],
               ),
               backgroundColor: const Color(0xFF16A34A),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
+              margin: const EdgeInsets.all(16),
+              elevation: 4,
             ),
           );
         }
@@ -181,10 +213,10 @@ class _RequestsTabState extends State<RequestsTab> {
                       child: OutlinedButton(
                         onPressed: () => Navigator.pop(context, false),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           side: const BorderSide(color: Color(0xFFE2E8F0)),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: const Text(
@@ -203,9 +235,10 @@ class _RequestsTabState extends State<RequestsTab> {
                         onPressed: () => Navigator.pop(context, true),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFEF4444),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 0,
                         ),
@@ -214,7 +247,6 @@ class _RequestsTabState extends State<RequestsTab> {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -233,18 +265,36 @@ class _RequestsTabState extends State<RequestsTab> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Row(
+              content: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.white, size: 20),
-                  SizedBox(width: 12),
-                  Text('Connection request declined'),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.info_outline_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Connection request declined',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                 ],
               ),
               backgroundColor: const Color(0xFF64748B),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
+              margin: const EdgeInsets.all(16),
+              elevation: 4,
             ),
           );
         }
@@ -257,16 +307,34 @@ class _RequestsTabState extends State<RequestsTab> {
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
                 const SizedBox(width: 12),
-                Expanded(child: Text('Error handling request: $e')),
+                Expanded(
+                  child: Text(
+                    'Error handling request: $e',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
               ],
             ),
             backgroundColor: const Color(0xFFEF4444),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
           ),
         );
       }
@@ -280,7 +348,8 @@ class _RequestsTabState extends State<RequestsTab> {
 
     return Container(
       color: const Color(0xFFF8FAFC),
-      child: SafeArea(top: false,
+      child: SafeArea(
+        top: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -676,7 +745,7 @@ class _RequestsTabState extends State<RequestsTab> {
                                             ),
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(10),
+                                                  BorderRadius.circular(12),
                                             ),
                                           ),
                                         ),
@@ -714,7 +783,7 @@ class _RequestsTabState extends State<RequestsTab> {
                                           ),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(
-                                              10,
+                                              12,
                                             ),
                                           ),
                                         ),

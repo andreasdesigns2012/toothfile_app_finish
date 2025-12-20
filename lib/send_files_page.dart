@@ -530,18 +530,36 @@ class _SendFilesDialogState extends State<SendFilesDialog> {
     if (_pickedFiles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              Icon(Icons.warning_rounded, color: Colors.white, size: 20),
-              SizedBox(width: 12),
-              Text('Please select at least one file'),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Please select at least one file',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ),
             ],
           ),
           backgroundColor: const Color(0xFFF97316),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
           ),
+          margin: const EdgeInsets.all(16),
+          elevation: 4,
         ),
       );
       return;
@@ -558,18 +576,36 @@ class _SendFilesDialogState extends State<SendFilesDialog> {
       if (user == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               children: [
-                Icon(Icons.error_outline, color: Colors.white, size: 20),
-                SizedBox(width: 12),
-                Text('User not logged in'),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'User not logged in',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
               ],
             ),
             backgroundColor: const Color(0xFFEF4444),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
           ),
         );
         setState(() {
@@ -588,18 +624,36 @@ class _SendFilesDialogState extends State<SendFilesDialog> {
       if (receiver.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               children: [
-                Icon(Icons.error_outline, color: Colors.white, size: 20),
-                SizedBox(width: 12),
-                Text('Recipient not found'),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Recipient not found',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
               ],
             ),
             backgroundColor: const Color(0xFFEF4444),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
           ),
         );
         setState(() {
@@ -688,18 +742,36 @@ class _SendFilesDialogState extends State<SendFilesDialog> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-              SizedBox(width: 12),
-              Text('Files sent successfully!'),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Files sent successfully!',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ),
             ],
           ),
           backgroundColor: const Color(0xFF16A34A),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
           ),
+          margin: const EdgeInsets.all(16),
+          elevation: 4,
         ),
       );
 
@@ -720,16 +792,34 @@ class _SendFilesDialogState extends State<SendFilesDialog> {
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.error_outline, color: Colors.white, size: 20),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.error_outline_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
               const SizedBox(width: 12),
-              Expanded(child: Text('Error sending files: $e')),
+              Expanded(
+                child: Text(
+                  'Error sending files: $e',
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ),
             ],
           ),
           backgroundColor: const Color(0xFFEF4444),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
           ),
+          margin: const EdgeInsets.all(16),
+          elevation: 4,
         ),
       );
     } finally {

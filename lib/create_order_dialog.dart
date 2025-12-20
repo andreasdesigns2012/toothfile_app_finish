@@ -27,11 +27,62 @@ class _CreateOrderDialogState extends State<CreateOrderDialog> {
   List<PlatformFile> _selectedFiles = [];
   bool _isSubmitting = false;
 
-  final List<String> _dentalTechnicians = [
-    'Dr. Smith',
-    'Dr. Jones',
-    'Dr. Williams',
-  ];
+  List<String> _dentalTechnicians = [];
+  bool _isLoadingTechnicians = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDentalTechnicians();
+  }
+
+  Future<void> _fetchDentalTechnicians() async {
+    setState(() => _isLoadingTechnicians = true);
+    try {
+      final supabase = Supabase.instance.client;
+      final currentUserId = supabase.auth.currentUser?.id;
+      if (currentUserId == null) return;
+
+      final connectionsResponse = await supabase
+          .from('connection_requests')
+          .select('sender_id, receiver_id')
+          .eq('status', 'accepted')
+          .or('sender_id.eq.$currentUserId,receiver_id.eq.$currentUserId');
+
+      final List<String> connectedUserIds = [];
+      for (var connection in connectionsResponse) {
+        if (connection['sender_id'] == currentUserId) {
+          connectedUserIds.add(connection['receiver_id']);
+        } else {
+          connectedUserIds.add(connection['sender_id']);
+        }
+      }
+
+      if (connectedUserIds.isEmpty) {
+        setState(() {
+          _dentalTechnicians = [];
+          _isLoadingTechnicians = false;
+        });
+        return;
+      }
+
+      final response = await supabase
+          .from('profiles')
+          .select('name')
+          .inFilter('id', connectedUserIds)
+          .order('name', ascending: true);
+
+      setState(() {
+        _dentalTechnicians = List<Map<String, dynamic>>.from(
+          response,
+        ).map((e) => e['name'] as String).toList();
+        _isLoadingTechnicians = false;
+      });
+    } catch (e) {
+      print('Error fetching technicians: $e');
+      setState(() => _isLoadingTechnicians = false);
+    }
+  }
 
   final Map<String, List<String>> _toothColorGroups = {
     'A': ['A1', 'A2', 'A3', 'A3.5', 'A4'],
@@ -566,20 +617,34 @@ class _CreateOrderDialogState extends State<CreateOrderDialog> {
               SnackBar(
                 content: Row(
                   children: [
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.white,
-                      size: 20,
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.error_outline_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(child: Text('Upload failed: ${file.name}')),
+                    Expanded(
+                      child: Text(
+                        'Upload failed: ${file.name}',
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                    ),
                   ],
                 ),
                 backgroundColor: const Color(0xFFEF4444),
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                margin: const EdgeInsets.all(16),
+                elevation: 4,
               ),
             );
           }
@@ -621,18 +686,36 @@ class _CreateOrderDialogState extends State<CreateOrderDialog> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               children: [
-                Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-                SizedBox(width: 12),
-                Text('Order created successfully!'),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Order created successfully!',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
               ],
             ),
             backgroundColor: const Color(0xFF16A34A),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
           ),
         );
       }
@@ -640,8 +723,36 @@ class _CreateOrderDialogState extends State<CreateOrderDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error creating order: $e'),
+            content: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Error creating order: $e',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
             backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
           ),
         );
       }
@@ -843,6 +954,70 @@ class _CreateOrderDialogState extends State<CreateOrderDialog> {
                       },
                       onSelected: (String selection) {
                         setState(() => _dentalTechnicianName = selection);
+                      },
+                      optionsViewBuilder: (context, onSelected, options) {
+                        return Align(
+                          alignment: Alignment.topLeft,
+                          child: Material(
+                            elevation: 8,
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.white,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight: 200,
+                                maxWidth:
+                                    MediaQuery.of(context).size.width - 48,
+                              ),
+                              child: ListView.builder(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
+                                shrinkWrap: true,
+                                itemCount: options.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final String option = options.elementAt(
+                                    index,
+                                  );
+                                  return InkWell(
+                                    onTap: () => onSelected(option),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFDCFCE7),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: const Icon(
+                                              Icons.person_rounded,
+                                              size: 14,
+                                              color: Color(0xFF16A34A),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Text(
+                                            option,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Color(0xFF020817),
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        );
                       },
                       fieldViewBuilder:
                           (context, controller, focusNode, onFieldSubmitted) {

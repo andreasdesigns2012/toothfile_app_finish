@@ -108,16 +108,34 @@ class _SettingsTabState extends State<SettingsTab> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Row(
+        content: Row(
           children: [
-            Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-            SizedBox(width: 12),
-            Text('App icon updated'),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'App icon updated',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
           ],
         ),
         backgroundColor: const Color(0xFF16A34A),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+        elevation: 4,
       ),
     );
   }
@@ -151,16 +169,6 @@ class _SettingsTabState extends State<SettingsTab> {
           const SizedBox(height: 6),
           Row(
             children: [
-              Text(
-                'Status: ${_pushEnabled ? 'Enabled' : 'Not enabled'}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: _pushEnabled
-                      ? const Color(0xFF16A34A)
-                      : const Color(0xFFF59E0B),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
               const Spacer(),
               _pushEnabled
                   ? Row(
@@ -311,9 +319,37 @@ class _SettingsTabState extends State<SettingsTab> {
       if (kIsWeb && (picked == null || picked.isEmpty)) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Browser controls download location on Web'),
-            backgroundColor: Color(0xFF64748B),
+          SnackBar(
+            content: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.info_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Browser controls download location on Web',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF64748B),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
           ),
         );
       }
@@ -324,18 +360,36 @@ class _SettingsTabState extends State<SettingsTab> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               children: [
-                Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-                SizedBox(width: 12),
-                Text('Download folder updated'),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Download folder updated',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
               ],
             ),
             backgroundColor: const Color(0xFF16A34A),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
           ),
         );
       }
@@ -343,8 +397,36 @@ class _SettingsTabState extends State<SettingsTab> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to update folder: $e'),
+          content: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.error_outline_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Failed to update folder: $e',
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ),
+            ],
+          ),
           backgroundColor: const Color(0xFFEF4444),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          elevation: 4,
         ),
       );
     } finally {
@@ -408,9 +490,9 @@ class _SettingsTabState extends State<SettingsTab> {
                   border: Border.all(color: const Color(0xFFE2E8F0)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -460,9 +542,9 @@ class _SettingsTabState extends State<SettingsTab> {
                   border: Border.all(color: const Color(0xFFE2E8F0)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -711,22 +793,38 @@ class _SettingsTabState extends State<SettingsTab> {
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: const Row(
+                                  content: Row(
                                     children: [
-                                      Icon(
-                                        Icons.error_outline,
-                                        color: Colors.white,
-                                        size: 20,
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.2),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.error_outline_rounded,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
                                       ),
-                                      SizedBox(width: 12),
-                                      Text('No user signed in'),
+                                      const SizedBox(width: 12),
+                                      const Expanded(
+                                        child: Text(
+                                          'No user signed in',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   backgroundColor: const Color(0xFFEF4444),
                                   behavior: SnackBarBehavior.floating,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
+                                  margin: const EdgeInsets.all(16),
+                                  elevation: 4,
                                 ),
                               );
                               return;
@@ -753,22 +851,40 @@ class _SettingsTabState extends State<SettingsTab> {
                                 if (!mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: const Row(
+                                    content: Row(
                                       children: [
-                                        Icon(
-                                          Icons.check_circle_rounded,
-                                          color: Colors.white,
-                                          size: 20,
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(
+                                              0.2,
+                                            ),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.check_rounded,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
                                         ),
-                                        SizedBox(width: 12),
-                                        Text('Profile updated successfully'),
+                                        const SizedBox(width: 12),
+                                        const Expanded(
+                                          child: Text(
+                                            'Profile updated successfully',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                     backgroundColor: const Color(0xFF16A34A),
                                     behavior: SnackBarBehavior.floating,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
+                                    margin: const EdgeInsets.all(16),
+                                    elevation: 4,
                                   ),
                                 );
                               }
@@ -778,15 +894,25 @@ class _SettingsTabState extends State<SettingsTab> {
                                 SnackBar(
                                   content: Row(
                                     children: [
-                                      const Icon(
-                                        Icons.error_outline,
-                                        color: Colors.white,
-                                        size: 20,
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.2),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.error_outline_rounded,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
                                       ),
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: Text(
                                           'Failed to save changes: $e',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -794,8 +920,10 @@ class _SettingsTabState extends State<SettingsTab> {
                                   backgroundColor: const Color(0xFFEF4444),
                                   behavior: SnackBarBehavior.floating,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
+                                  margin: const EdgeInsets.all(16),
+                                  elevation: 4,
                                 ),
                               );
                             }
@@ -836,9 +964,9 @@ class _SettingsTabState extends State<SettingsTab> {
                   border: Border.all(color: const Color(0xFFE2E8F0)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -1197,19 +1325,50 @@ class _SettingsTabState extends State<SettingsTab> {
     String value, {
     bool isChip = false,
   }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-        if (isChip)
-          Chip(
-            label: Text(value),
-            backgroundColor: Colors.blue.shade50,
-            labelStyle: TextStyle(color: Colors.blue.shade800),
-          )
-        else
-          Text(value),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF64748B),
+            ),
+          ),
+          if (isChip)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFDBEAFE),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2563EB),
+                ),
+              ),
+            )
+          else
+            Expanded(
+              child: Text(
+                value,
+                textAlign: TextAlign.end,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF020817),
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "774900813610",
+    "project_id": "toothfile-61f5e",
+    "storage_bucket": "toothfile-61f5e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:774900813610:android:39afa6a5e2f04defb15853",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_3"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC39GOPpzze7JGq9DU64HKzd9dHfNhPbkg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

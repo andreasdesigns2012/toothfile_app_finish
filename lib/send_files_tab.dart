@@ -142,28 +142,87 @@ class _SendFilesTabState extends State<SendFilesTab> {
               const SizedBox(height: 16),
               ...['All Roles', 'dental', 'technician'].map((role) {
                 final isSelected = _selectedRole == role;
-                return ListTile(
-                  title: Text(
-                    role,
-                    style: TextStyle(
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.w400,
-                      color: isSelected
-                          ? const Color(0xFF8B5CF6)
-                          : const Color(0xFF020817),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 6,
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedRole = role;
+                        _filterUsers();
+                      });
+                      Navigator.pop(context);
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? const Color(0xFFF3E8FF)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? const Color(0xFFD8B4FE)
+                              : Colors.transparent,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFF8B5CF6)
+                                  : const Color(0xFFF1F5F9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              role == 'dental'
+                                  ? Icons.medical_services_rounded
+                                  : role == 'technician'
+                                  ? Icons.build_rounded
+                                  : Icons.people_alt_rounded,
+                              size: 16,
+                              color: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF64748B),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              role == 'dental'
+                                  ? 'Dental Practice'
+                                  : role == 'technician'
+                                  ? 'Dental Technician'
+                                  : 'All Roles',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                                color: isSelected
+                                    ? const Color(0xFF5B21B6)
+                                    : const Color(0xFF0F172A),
+                              ),
+                            ),
+                          ),
+                          if (isSelected)
+                            const Icon(
+                              Icons.check_circle_rounded,
+                              color: Color(0xFF8B5CF6),
+                              size: 20,
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                  trailing: isSelected
-                      ? const Icon(Icons.check, color: Color(0xFF8B5CF6))
-                      : null,
-                  onTap: () {
-                    setState(() {
-                      _selectedRole = role;
-                      _filterUsers();
-                    });
-                    Navigator.pop(context);
-                  },
                 );
               }).toList(),
               const SizedBox(height: 10),
@@ -271,9 +330,9 @@ class _SendFilesTabState extends State<SendFilesTab> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
@@ -285,11 +344,11 @@ class _SendFilesTabState extends State<SendFilesTab> {
                           prefixIcon: Icon(
                             Icons.search,
                             color: Color(0xFF94A3B8),
-                            size: 22,
+                            size: 20,
                           ),
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(
-                            vertical: 16,
+                            vertical: 14,
                             horizontal: 16,
                           ),
                         ),
@@ -549,24 +608,6 @@ class _SendFilesTabState extends State<SendFilesTab> {
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFF2563EB),
                               ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Icon(
-                            Icons.check_circle_rounded,
-                            size: 14,
-                            color: Color(0xFF22C55E),
-                          ),
-                          const SizedBox(width: 4),
-                          const Flexible(
-                            child: Text(
-                              'Connected',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF64748B),
-                                fontWeight: FontWeight.w500,
-                              ),
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],

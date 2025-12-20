@@ -154,10 +154,10 @@ class _ReceivedFilesTabState extends State<ReceivedFilesTab> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context, false),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       side: const BorderSide(color: Color(0xFFE2E8F0)),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                     child: const Text(
@@ -176,9 +176,10 @@ class _ReceivedFilesTabState extends State<ReceivedFilesTab> {
                     onPressed: () => Navigator.pop(context, true),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFEF4444),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 0,
                     ),
@@ -187,7 +188,6 @@ class _ReceivedFilesTabState extends State<ReceivedFilesTab> {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -214,22 +214,36 @@ class _ReceivedFilesTabState extends State<ReceivedFilesTab> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Row(
+              content: Row(
                 children: [
-                  Icon(
-                    Icons.check_circle_rounded,
-                    color: Colors.white,
-                    size: 20,
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
-                  SizedBox(width: 12),
-                  Text('File deleted successfully'),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'File deleted successfully',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                 ],
               ),
               backgroundColor: const Color(0xFF16A34A),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
+              margin: const EdgeInsets.all(16),
+              elevation: 4,
             ),
           );
         }
@@ -237,8 +251,36 @@ class _ReceivedFilesTabState extends State<ReceivedFilesTab> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to delete file: $e'),
+              content: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.error_outline_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Failed to delete file: $e',
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
               backgroundColor: const Color(0xFFEF4444),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              margin: const EdgeInsets.all(16),
+              elevation: 4,
             ),
           );
         }
@@ -337,9 +379,9 @@ class _ReceivedFilesTabState extends State<ReceivedFilesTab> {
                   border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -351,11 +393,11 @@ class _ReceivedFilesTabState extends State<ReceivedFilesTab> {
                     prefixIcon: Icon(
                       Icons.search,
                       color: Color(0xFF94A3B8),
-                      size: 22,
+                      size: 20,
                     ),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(
-                      vertical: 16,
+                      vertical: 14,
                       horizontal: 16,
                     ),
                   ),
@@ -495,22 +537,36 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Row(
+              content: Row(
                 children: [
-                  Icon(
-                    Icons.open_in_browser_rounded,
-                    color: Colors.white,
-                    size: 20,
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.open_in_browser_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
-                  SizedBox(width: 12),
-                  Expanded(child: Text('Downloading via browser')),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Downloading via browser',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                 ],
               ),
               backgroundColor: const Color(0xFF16A34A),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
+              margin: const EdgeInsets.all(16),
+              elevation: 4,
             ),
           );
         }
@@ -544,20 +600,34 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(
-                    Icons.check_circle_rounded,
-                    color: Colors.white,
-                    size: 20,
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(child: Text('File saved to: ${file.path}')),
+                  Expanded(
+                    child: Text(
+                      'File saved to: ${file.path}',
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                 ],
               ),
               backgroundColor: const Color(0xFF16A34A),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
+              margin: const EdgeInsets.all(16),
+              elevation: 4,
             ),
           );
         }
@@ -566,8 +636,36 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Download failed: $e'),
+            content: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Download failed: $e',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
             backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
           ),
         );
       }
@@ -592,59 +690,61 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE2E8F0),
-                borderRadius: BorderRadius.circular(2),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE2E8F0),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFDBEAFE),
-                    borderRadius: BorderRadius.circular(10),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDBEAFE),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.info_rounded,
+                      color: Color(0xFF2563EB),
+                      size: 24,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.info_rounded,
-                    color: Color(0xFF2563EB),
-                    size: 24,
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Order Details',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF020817),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                const Text(
-                  'Order Details',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF020817),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            _buildDetailRow(
-              'Customer Name',
-              customerName,
-              Icons.person_rounded,
-            ),
-            const SizedBox(height: 16),
-            _buildDetailRow(
-              'Selected Teeth',
-              selectedTeeth,
-              Icons.medical_services_rounded,
-            ),
-            const SizedBox(height: 16),
-            _buildDetailRow('Tooth Color', toothColor, Icons.palette_rounded),
-            const SizedBox(height: 24),
-          ],
+                ],
+              ),
+              const SizedBox(height: 24),
+              _buildDetailRow(
+                'Customer Name',
+                customerName,
+                Icons.person_rounded,
+              ),
+              const SizedBox(height: 16),
+              _buildDetailRow(
+                'Selected Teeth',
+                selectedTeeth,
+                Icons.medical_services_rounded,
+              ),
+              const SizedBox(height: 16),
+              _buildDetailRow('Tooth Color', toothColor, Icons.palette_rounded),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );
@@ -830,24 +930,6 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFEE2E2),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.delete_rounded,
-                      size: 20,
-                      color: Color(0xFFEF4444),
-                    ),
-                    onPressed: widget.onDelete,
-                    padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(),
-                    tooltip: 'Delete File',
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
@@ -873,6 +955,24 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
                     padding: const EdgeInsets.all(8),
                     constraints: const BoxConstraints(),
                     tooltip: 'Forward File',
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEE2E2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.delete_rounded,
+                      size: 20,
+                      color: Color(0xFFEF4444),
+                    ),
+                    onPressed: widget.onDelete,
+                    padding: const EdgeInsets.all(8),
+                    constraints: const BoxConstraints(),
+                    tooltip: 'Delete File',
                   ),
                 ),
               ],

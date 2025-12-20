@@ -13,6 +13,8 @@ import 'package:toothfile/push_notification_service.dart';
 // Removed global plugin setup on desktop to avoid unsupported initialization
 
 final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+bool _supabaseReady = false;
+String? _initError;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,11 +28,16 @@ Future<void> main() async {
     } catch (_) {}
   }
 
-  await Supabase.initialize(
-    url: 'https://ikqsbkfnjamvkevsxqpr.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrcXNia2ZuamFtdmtldnN4cXByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAzNTUxMDMsImV4cCI6MjA2NTkzMTEwM30.fhRMXkOu8WAD6B_zMCe1xBI6E_Ql4pRzRnfJHZS7qPM',
-  );
+  try {
+    await Supabase.initialize(
+      url: 'https://ikqsbkfnjamvkevsxqpr.supabase.co',
+      anonKey:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrcXNia2ZuamFtdmtldnN4cXByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAzNTUxMDMsImV4cCI6MjA2NTkzMTEwM30.fhRMXkOu8WAD6B_zMCe1xBI6E_Ql4pRzRnfJHZS7qPM',
+    );
+    _supabaseReady = true;
+  } catch (e) {
+    _initError = e.toString();
+  }
 
   PushNotificationService.initialize(_navigatorKey);
   runApp(const MyApp());
@@ -56,12 +63,7 @@ class _MyAppState extends State<MyApp> {
       home: StreamBuilder<AuthState>(
         stream: SupabaseAuthService.authStateChanges,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-
+          if (!_supabaseReady) return const AuthPage();
           final user = Supabase.instance.client.auth.currentUser;
 
           if (user != null) {
@@ -249,10 +251,39 @@ class _AuthPageState extends State<AuthPage> {
 
                       if (email.isEmpty || password.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Please enter both email and password',
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Expanded(
+                                  child: Text(
+                                    'Please enter both email and password',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
+                            backgroundColor: const Color(0xFFF97316),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            margin: const EdgeInsets.all(16),
+                            elevation: 4,
                           ),
                         );
                         return;
@@ -283,7 +314,40 @@ class _AuthPageState extends State<AuthPage> {
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(response['message'])),
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.error_outline_rounded,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    response['message'],
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            backgroundColor: const Color(0xFFEF4444),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            margin: const EdgeInsets.all(16),
+                            elevation: 4,
+                          ),
                         );
                       }
                     },
@@ -623,10 +687,39 @@ class _AuthPageState extends State<AuthPage> {
                             password.isEmpty ||
                             _selectedRole == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Please fill in all fields and select a role',
+                            SnackBar(
+                              content: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.warning_amber_rounded,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Expanded(
+                                    child: Text(
+                                      'Please fill in all fields and select a role',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
+                              backgroundColor: const Color(0xFFF97316),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              margin: const EdgeInsets.all(16),
+                              elevation: 4,
                             ),
                           );
                           return;
@@ -662,7 +755,40 @@ class _AuthPageState extends State<AuthPage> {
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(response['message'])),
+                              SnackBar(
+                                content: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.2),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.error_outline_rounded,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        response['message'],
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                backgroundColor: const Color(0xFFEF4444),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                margin: const EdgeInsets.all(16),
+                                elevation: 4,
+                              ),
                             );
                           }
                         } catch (e) {
@@ -673,7 +799,40 @@ class _AuthPageState extends State<AuthPage> {
                           });
 
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('An error occurred: $e')),
+                            SnackBar(
+                              content: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.error_outline_rounded,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'An error occurred: $e',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              backgroundColor: const Color(0xFFEF4444),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              margin: const EdgeInsets.all(16),
+                              elevation: 4,
+                            ),
                           );
                         }
                       },

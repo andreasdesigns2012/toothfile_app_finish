@@ -106,16 +106,34 @@ class _FileTrackerTabState extends State<FileTrackerTab> {
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
                 const SizedBox(width: 12),
-                Expanded(child: Text('Error loading files: $e')),
+                Expanded(
+                  child: Text(
+                    'Error loading files: $e',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
               ],
             ),
             backgroundColor: const Color(0xFFEF4444),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
           ),
         );
       }
@@ -208,32 +226,86 @@ class _FileTrackerTabState extends State<FileTrackerTab> {
               ),
             ),
             const SizedBox(height: 16),
-            ...[
-              'All Status',
-              'Sent',
-              'Viewed',
-              'Downloaded',
-            ].map((status) {
+            ...['All Status', 'Sent', 'Viewed', 'Downloaded'].map((status) {
               final isSelected = _selectedFilter == status;
-              return ListTile(
-                title: Text(
-                  status,
-                  style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                    color: isSelected
-                        ? const Color(0xFF16A34A)
-                        : const Color(0xFF020817),
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 6,
+                ),
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _selectedFilter = status;
+                    });
+                    Navigator.pop(context);
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFFDCFCE7)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected
+                            ? const Color(0xFF86EFAC)
+                            : Colors.transparent,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? const Color(0xFF16A34A)
+                                : const Color(0xFFF1F5F9),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            status == 'Downloaded'
+                                ? Icons.download_done_rounded
+                                : status == 'Viewed'
+                                ? Icons.visibility_rounded
+                                : status == 'Sent'
+                                ? Icons.send_rounded
+                                : Icons.filter_list_rounded,
+                            size: 16,
+                            color: isSelected
+                                ? Colors.white
+                                : const Color(0xFF64748B),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            status,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? const Color(0xFF14532D)
+                                  : const Color(0xFF0F172A),
+                            ),
+                          ),
+                        ),
+                        if (isSelected)
+                          const Icon(
+                            Icons.check_circle_rounded,
+                            color: Color(0xFF16A34A),
+                            size: 20,
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-                trailing: isSelected
-                    ? const Icon(Icons.check, color: Color(0xFF16A34A))
-                    : null,
-                onTap: () {
-                  setState(() {
-                    _selectedFilter = status;
-                  });
-                  Navigator.pop(context);
-                },
               );
             }).toList(),
             const SizedBox(height: 10),
@@ -354,18 +426,36 @@ class _FileTrackerTabState extends State<FileTrackerTab> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Row(
+              content: Row(
                 children: [
-                  Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-                  SizedBox(width: 12),
-                  Text('File record deleted successfully'),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'File record deleted successfully',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                 ],
               ),
               backgroundColor: const Color(0xFF16A34A),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
+              margin: const EdgeInsets.all(16),
+              elevation: 4,
             ),
           );
         }
@@ -376,16 +466,34 @@ class _FileTrackerTabState extends State<FileTrackerTab> {
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.error_outline_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(child: Text('Error deleting file: $e')),
+                  Expanded(
+                    child: Text(
+                      'Error deleting file: $e',
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                 ],
               ),
               backgroundColor: const Color(0xFFEF4444),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
+              margin: const EdgeInsets.all(16),
+              elevation: 4,
             ),
           );
         }
@@ -401,7 +509,8 @@ class _FileTrackerTabState extends State<FileTrackerTab> {
 
     return Container(
       color: const Color(0xFFF8FAFC),
-      child: SafeArea(top: false,
+      child: SafeArea(
+        top: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -490,9 +599,9 @@ class _FileTrackerTabState extends State<FileTrackerTab> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
@@ -509,11 +618,11 @@ class _FileTrackerTabState extends State<FileTrackerTab> {
                           prefixIcon: Icon(
                             Icons.search,
                             color: Color(0xFF94A3B8),
-                            size: 22,
+                            size: 20,
                           ),
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(
-                            vertical: 16,
+                            vertical: 14,
                             horizontal: 16,
                           ),
                         ),
@@ -583,414 +692,420 @@ class _FileTrackerTabState extends State<FileTrackerTab> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : filteredFiles.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(24),
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFF1F5F9),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.folder_open_rounded,
-                                  size: 64,
-                                  color: Color(0xFF94A3B8),
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              const Text(
-                                'No files sent yet',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF020817),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Files you send will be tracked here',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xFF64748B),
-                                ),
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFF1F5F9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.folder_open_rounded,
+                              size: 64,
+                              color: Color(0xFF94A3B8),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'No files sent yet',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF020817),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Files you send will be tracked here',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: EdgeInsets.fromLTRB(
+                        isMobile ? 16 : 24,
+                        0,
+                        isMobile ? 16 : 24,
+                        isMobile ? 16 : 24,
+                      ),
+                      itemCount: filteredFiles.length,
+                      itemBuilder: (context, index) {
+                        final file = filteredFiles[index];
+                        final status = _getFileStatus(file);
+                        final receiverName = file['receiver_name'] ?? 'Unknown';
+                        final receiverEmail = file['receiver_email'] ?? 'N/A';
+                        final initials =
+                            receiverName.isNotEmpty && receiverName != 'Unknown'
+                            ? receiverName[0].toUpperCase()
+                            : 'U';
+                        final createdAt = DateTime.parse(file['created_at']);
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: const Color(0xFFE2E8F0),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.03),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
                               ),
                             ],
                           ),
-                        )
-                      : ListView.builder(
-                          padding: EdgeInsets.fromLTRB(
-                            isMobile ? 16 : 24,
-                            0,
-                            isMobile ? 16 : 24,
-                            isMobile ? 16 : 24,
-                          ),
-                          itemCount: filteredFiles.length,
-                          itemBuilder: (context, index) {
-                            final file = filteredFiles[index];
-                            final status = _getFileStatus(file);
-                            final receiverName = file['receiver_name'] ?? 'Unknown';
-                            final receiverEmail = file['receiver_email'] ?? 'N/A';
-                            final initials = receiverName.isNotEmpty &&
-                                    receiverName != 'Unknown'
-                                ? receiverName[0].toUpperCase()
-                                : 'U';
-                            final createdAt = DateTime.parse(file['created_at']);
-
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: const Color(0xFFE2E8F0),
-                                  width: 1,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.03),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // File Info Row
+                                Row(
                                   children: [
-                                    // File Info Row
-                                    Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(10),
-                                          decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              colors: [
-                                                Color(0xFF8B5CF6),
-                                                Color(0xFF6366F1),
-                                              ],
-                                            ),
-                                            borderRadius: BorderRadius.circular(10),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: const Color(0xFF8B5CF6)
-                                                    .withOpacity(0.3),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 4),
-                                              ),
-                                            ],
-                                          ),
-                                          child: const Icon(
-                                            Icons.insert_drive_file_rounded,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                file['file_name'],
-                                                style: const TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Color(0xFF020817),
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                _formatFileSize(file['file_size']),
-                                                style: const TextStyle(
-                                                  fontSize: 13,
-                                                  color: Color(0xFF64748B),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                            vertical: 6,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: status == 'Downloaded'
-                                                ? const Color(0xFFDCFCE7)
-                                                : status == 'Viewed'
-                                                    ? const Color(0xFFFEF3C7)
-                                                    : const Color(0xFFDBEAFE),
-                                            borderRadius: BorderRadius.circular(6),
-                                          ),
-                                          child: Text(
-                                            status,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                              color: status == 'Downloaded'
-                                                  ? const Color(0xFF16A34A)
-                                                  : status == 'Viewed'
-                                                      ? const Color(0xFFF59E0B)
-                                                      : const Color(0xFF2563EB),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFFEE2E2),
-                                            borderRadius: BorderRadius.circular(6),
-                                          ),
-                                          child: IconButton(
-                                            icon: const Icon(
-                                              Icons.delete_rounded,
-                                              size: 18,
-                                              color: Color(0xFFEF4444),
-                                            ),
-                                            onPressed: () => _deleteFile(
-                                              file['id'],
-                                              file['file_name'],
-                                            ),
-                                            padding: const EdgeInsets.all(6),
-                                            constraints: const BoxConstraints(),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 16),
-
-                                    // Receiver Info Row
-                                    Row(
-                                      children: [
-                                        Stack(
-                                          children: [
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                gradient: const LinearGradient(
-                                                  colors: [
-                                                    Color(0xFF4B5563),
-                                                    Color(0xFF6B7280),
-                                                  ],
-                                                  begin: Alignment.topLeft,
-                                                  end: Alignment.bottomRight,
-                                                ),
-                                              ),
-                                              child: CircleAvatar(
-                                                radius: 18,
-                                                backgroundColor: Colors.transparent,
-                                                child: Text(
-                                                  initials,
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Positioned(
-                                              bottom: 0,
-                                              right: 0,
-                                              child: Container(
-                                                width: 10,
-                                                height: 10,
-                                                decoration: BoxDecoration(
-                                                  color: const Color(0xFF22C55E),
-                                                  shape: BoxShape.circle,
-                                                  border: Border.all(
-                                                    color: Colors.white,
-                                                    width: 2,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            Color(0xFF8B5CF6),
+                                            Color(0xFF6366F1),
                                           ],
                                         ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                receiverName,
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Color(0xFF020817),
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color(
+                                              0xFF8B5CF6,
+                                            ).withOpacity(0.3),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child: const Icon(
+                                        Icons.insert_drive_file_rounded,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            file['file_name'],
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600,
+                                              color: Color(0xFF020817),
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            _formatFileSize(file['file_size']),
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              color: Color(0xFF64748B),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: status == 'Downloaded'
+                                            ? const Color(0xFFDCFCE7)
+                                            : status == 'Viewed'
+                                            ? const Color(0xFFFEF3C7)
+                                            : const Color(0xFFDBEAFE),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        status,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: status == 'Downloaded'
+                                              ? const Color(0xFF16A34A)
+                                              : status == 'Viewed'
+                                              ? const Color(0xFFF59E0B)
+                                              : const Color(0xFF2563EB),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFFEE2E2),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: IconButton(
+                                        icon: const Icon(
+                                          Icons.delete_rounded,
+                                          size: 18,
+                                          color: Color(0xFFEF4444),
+                                        ),
+                                        onPressed: () => _deleteFile(
+                                          file['id'],
+                                          file['file_name'],
+                                        ),
+                                        padding: const EdgeInsets.all(6),
+                                        constraints: const BoxConstraints(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Receiver Info Row
+                                Row(
+                                  children: [
+                                    Stack(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            gradient: const LinearGradient(
+                                              colors: [
+                                                Color(0xFF4B5563),
+                                                Color(0xFF6B7280),
+                                              ],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                            ),
+                                          ),
+                                          child: CircleAvatar(
+                                            radius: 18,
+                                            backgroundColor: Colors.transparent,
+                                            child: Text(
+                                              initials,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
                                               ),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                receiverEmail,
-                                                style: const TextStyle(
-                                                  fontSize: 12,
-                                                  color: Color(0xFF64748B),
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ],
+                                            ),
                                           ),
                                         ),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 4,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFF1F5F9),
-                                            borderRadius: BorderRadius.circular(6),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
-                                                Icons.access_time_rounded,
-                                                size: 12,
-                                                color: Color(0xFF64748B),
+                                        Positioned(
+                                          bottom: 0,
+                                          right: 0,
+                                          child: Container(
+                                            width: 10,
+                                            height: 10,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF22C55E),
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: Colors.white,
+                                                width: 2,
                                               ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                timeago.format(createdAt),
-                                                style: const TextStyle(
-                                                  fontSize: 12,
-                                                  color: Color(0xFF64748B),
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ],
+                                            ),
                                           ),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 16),
-
-                                    // Progress Row
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFF8FAFC),
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(
-                                          color: const Color(0xFFE2E8F0),
-                                        ),
-                                      ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
                                       child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          // Progress Bar
-                                          Container(
-                                            height: 6,
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFFE2E8F0),
-                                              borderRadius: BorderRadius.circular(3),
+                                          Text(
+                                            receiverName,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: Color(0xFF020817),
                                             ),
-                                            child: Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: FractionallySizedBox(
-                                                widthFactor: status == 'Downloaded'
-                                                    ? 1.0
-                                                    : status == 'Viewed'
-                                                        ? 0.66
-                                                        : 0.33,
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    gradient: const LinearGradient(
-                                                      colors: [
-                                                        Color(0xFF16A34A),
-                                                        Color(0xFF22C55E),
-                                                      ],
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(3),
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: const Color(0xFF16A34A)
-                                                            .withOpacity(0.3),
-                                                        blurRadius: 4,
-                                                        offset: const Offset(0, 2),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                          const SizedBox(height: 10),
-                                          // Labels
-                                          Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.check_circle_rounded,
-                                                size: 16,
-                                                color: Color(0xFF16A34A),
-                                              ),
-                                              const SizedBox(width: 6),
-                                              const Text(
-                                                'Sent',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Color(0xFF16A34A),
-                                                ),
-                                              ),
-                                              const Spacer(),
-                                              Icon(
-                                                Icons.visibility_rounded,
-                                                size: 16,
-                                                color: status == 'Viewed' ||
-                                                        status == 'Downloaded'
-                                                    ? const Color(0xFF16A34A)
-                                                    : const Color(0xFF94A3B8),
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                'Viewed',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: status == 'Viewed' ||
-                                                          status == 'Downloaded'
-                                                      ? const Color(0xFF16A34A)
-                                                      : const Color(0xFF94A3B8),
-                                                ),
-                                              ),
-                                              const Spacer(),
-                                              Icon(
-                                                Icons.download_rounded,
-                                                size: 16,
-                                                color: status == 'Downloaded'
-                                                    ? const Color(0xFF16A34A)
-                                                    : const Color(0xFF94A3B8),
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                'Downloaded',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: status == 'Downloaded'
-                                                      ? const Color(0xFF16A34A)
-                                                      : const Color(0xFF94A3B8),
-                                                ),
-                                              ),
-                                            ],
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            receiverEmail,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Color(0xFF64748B),
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF1F5F9),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.access_time_rounded,
+                                            size: 12,
+                                            color: Color(0xFF64748B),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            timeago.format(createdAt),
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Color(0xFF64748B),
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
                                         ],
                                       ),
                                     ),
                                   ],
                                 ),
-                              ),
-                            );
-                          },
-                        ),
+                                const SizedBox(height: 16),
+
+                                // Progress Row
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: const Color(0xFFE2E8F0),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      // Progress Bar
+                                      Container(
+                                        height: 6,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFE2E8F0),
+                                          borderRadius: BorderRadius.circular(
+                                            3,
+                                          ),
+                                        ),
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: FractionallySizedBox(
+                                            widthFactor: status == 'Downloaded'
+                                                ? 1.0
+                                                : status == 'Viewed'
+                                                ? 0.66
+                                                : 0.33,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                gradient: const LinearGradient(
+                                                  colors: [
+                                                    Color(0xFF16A34A),
+                                                    Color(0xFF22C55E),
+                                                  ],
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(3),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: const Color(
+                                                      0xFF16A34A,
+                                                    ).withOpacity(0.3),
+                                                    blurRadius: 4,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      // Labels
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.check_circle_rounded,
+                                            size: 16,
+                                            color: Color(0xFF16A34A),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          const Text(
+                                            'Sent',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: Color(0xFF16A34A),
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          Icon(
+                                            Icons.visibility_rounded,
+                                            size: 16,
+                                            color:
+                                                status == 'Viewed' ||
+                                                    status == 'Downloaded'
+                                                ? const Color(0xFF16A34A)
+                                                : const Color(0xFF94A3B8),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            'Viewed',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color:
+                                                  status == 'Viewed' ||
+                                                      status == 'Downloaded'
+                                                  ? const Color(0xFF16A34A)
+                                                  : const Color(0xFF94A3B8),
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          Icon(
+                                            Icons.download_rounded,
+                                            size: 16,
+                                            color: status == 'Downloaded'
+                                                ? const Color(0xFF16A34A)
+                                                : const Color(0xFF94A3B8),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            'Downloaded',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: status == 'Downloaded'
+                                                  ? const Color(0xFF16A34A)
+                                                  : const Color(0xFF94A3B8),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),

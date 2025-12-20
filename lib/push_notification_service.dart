@@ -615,7 +615,11 @@ class PushNotificationService {
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
         ),
-        iOS: const DarwinNotificationDetails(),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentSound: true,
+          presentBadge: true,
+        ),
         windows: _windowsDetails(),
       ),
       payload: jsonEncode({'type': 'file_received'}),

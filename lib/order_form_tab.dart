@@ -11,6 +11,8 @@ import 'package:path/path.dart' as p;
 import 'package:toothfile/order_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nfc_manager/nfc_manager.dart';
+import 'package:nfc_manager/ndef_record.dart';
+import 'package:nfc_manager_ndef/nfc_manager_ndef.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:convert';
 import 'forward_dialog.dart';
@@ -120,11 +122,12 @@ class _OrderFormTabState extends State<OrderFormTab> {
       }
 
       await NfcManager.instance.startSession(
-        alertMessage: 'Hold the NFC tag near the device',
+        alertMessageIos: 'Hold the NFC tag near the device',
+        pollingOptions: {NfcPollingOption.iso14443, NfcPollingOption.iso15693},
         onDiscovered: (tag) async {
           final ndef = Ndef.from(tag);
           if (ndef == null) {
-            await NfcManager.instance.stopSession(errorMessage: 'No NDEF');
+            await NfcManager.instance.stopSession(errorMessageIos: 'No NDEF');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Row(
@@ -169,7 +172,7 @@ class _OrderFormTabState extends State<OrderFormTab> {
             message = ndef.cachedMessage;
           }
           if (message == null || message.records.isEmpty) {
-            await NfcManager.instance.stopSession(errorMessage: 'Empty tag');
+            await NfcManager.instance.stopSession(errorMessageIos: 'Empty tag');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Row(
@@ -210,7 +213,7 @@ class _OrderFormTabState extends State<OrderFormTab> {
           String? jsonText;
           for (final r in message.records) {
             final isJsonMime =
-                r.typeNameFormat == NdefTypeNameFormat.media &&
+                r.typeNameFormat == TypeNameFormat.media &&
                 String.fromCharCodes(r.type) == 'application/json';
             if (isJsonMime) {
               jsonText = utf8.decode(r.payload);
@@ -221,7 +224,7 @@ class _OrderFormTabState extends State<OrderFormTab> {
 
           if (jsonText == null) {
             await NfcManager.instance.stopSession(
-              errorMessage: 'No JSON payload',
+              errorMessageIos: 'No JSON payload',
             );
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -264,7 +267,9 @@ class _OrderFormTabState extends State<OrderFormTab> {
           try {
             data = json.decode(jsonText) as Map<String, dynamic>;
           } catch (e) {
-            await NfcManager.instance.stopSession(errorMessage: 'Invalid JSON');
+            await NfcManager.instance.stopSession(
+              errorMessageIos: 'Invalid JSON',
+            );
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Row(
@@ -305,7 +310,7 @@ class _OrderFormTabState extends State<OrderFormTab> {
           final orderId = data['orderId']?.toString();
           if (orderId == null || orderId.isEmpty) {
             await NfcManager.instance.stopSession(
-              errorMessage: 'Missing orderId',
+              errorMessageIos: 'Missing orderId',
             );
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -357,7 +362,7 @@ class _OrderFormTabState extends State<OrderFormTab> {
                 providedPassword != null &&
                 originalPassword != providedPassword) {
               await NfcManager.instance.stopSession(
-                errorMessage: 'Invalid credentials',
+                errorMessageIos: 'Invalid credentials',
               );
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -398,7 +403,7 @@ class _OrderFormTabState extends State<OrderFormTab> {
 
             final user = supabase.auth.currentUser;
             if (user == null) {
-              await NfcManager.instance.stopSession(errorMessage: 'No user');
+              await NfcManager.instance.stopSession(errorMessageIos: 'No user');
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Row(
@@ -486,7 +491,7 @@ class _OrderFormTabState extends State<OrderFormTab> {
             await _fetchOrders();
           } catch (e) {
             await NfcManager.instance.stopSession(
-              errorMessage: 'Import failed',
+              errorMessageIos: 'Import failed',
             );
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -1617,15 +1622,20 @@ class OrderCard extends StatelessWidget {
       final payloadJson = '{"orderId":"$orderId","password":"$password"}';
 
       await NfcManager.instance.startSession(
-        alertMessage: 'Hold the NFC tag near the device',
+        alertMessageIos: 'Hold the NFC tag near the device',
+        pollingOptions: {NfcPollingOption.iso14443, NfcPollingOption.iso15693},
         onDiscovered: (tag) async {
           final ndef = Ndef.from(tag);
-          final message = NdefMessage([
-            NdefRecord.createMime(
-              'application/json',
-              Uint8List.fromList(utf8.encode(payloadJson)),
-            ),
-          ]);
+          final message = NdefMessage(
+            records: [
+              NdefRecord(
+                typeNameFormat: TypeNameFormat.media,
+                type: Uint8List.fromList(utf8.encode('application/json')),
+                identifier: Uint8List(0),
+                payload: Uint8List.fromList(utf8.encode(payloadJson)),
+              ),
+            ],
+          );
           if (ndef == null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -1661,11 +1671,11 @@ class OrderCard extends StatelessWidget {
                 elevation: 4,
               ),
             );
-            await NfcManager.instance.stopSession(errorMessage: 'No NDEF');
+            await NfcManager.instance.stopSession(errorMessageIos: 'No NDEF');
             return;
           }
           try {
-            await ndef.write(message);
+            await ndef.write(message: message);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Row(
@@ -1702,7 +1712,9 @@ class OrderCard extends StatelessWidget {
             );
             await NfcManager.instance.stopSession();
           } catch (e) {
-            await NfcManager.instance.stopSession(errorMessage: 'Write failed');
+            await NfcManager.instance.stopSession(
+              errorMessageIos: 'Write failed',
+            );
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Row(

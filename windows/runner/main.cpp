@@ -46,6 +46,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   // plugins.
   ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 
+  // Register the custom URL scheme
+  RegisterUrlScheme(L"io.supabase.toothfile");
+
   flutter::DartProject project(L"data");
 
   std::vector<std::string> command_line_arguments =

@@ -991,6 +991,110 @@ class _AuthPageState extends State<AuthPage> {
                       ),
               ),
             ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    'OR',
+                    style: TextStyle(
+                      color: Color(0xFF94A3B8),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+              ],
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        setState(() {
+                          _isLoading = true;
+                        });
+
+                        final response =
+                            await SupabaseAuthService.signInWithGoogle();
+
+                        if (!mounted) return;
+
+                        setState(() {
+                          _isLoading = false;
+                        });
+
+                        if (response['success']) {
+                          // Wait for AuthState change to redirect
+                        } else if (response['message'] !=
+                            'Google sign in canceled') {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.error_outline_rounded,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      response['message'],
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              backgroundColor: const Color(0xFFEF4444),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              margin: const EdgeInsets.all(16),
+                              elevation: 4,
+                            ),
+                          );
+                        }
+                      },
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                icon: Image.asset(
+                  'assets/google-logo.png',
+                  height: 20,
+                  width: 20,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.login, size: 20),
+                ),
+                label: const Text(
+                  'Sign up with Google',
+                  style: TextStyle(
+                    color: Color(0xFF020817),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

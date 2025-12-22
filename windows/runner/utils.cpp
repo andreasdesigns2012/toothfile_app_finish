@@ -6,6 +6,7 @@
 #include <windows.h>
 
 #include <iostream>
+#include <shlwapi.h>
 
 void CreateAndAttachConsole() {
   if (::AllocConsole()) {
@@ -62,4 +63,35 @@ std::string Utf8FromUtf16(const wchar_t* utf16_string) {
     return std::string();
   }
   return utf8_string;
+}
+
+void RegisterUrlScheme(const wchar_t* scheme) {
+  wchar_t exe_path[MAX_PATH];
+  ::GetModuleFileName(nullptr, exe_path, MAX_PATH);
+
+  wchar_t key_path[MAX_PATH];
+  swprintf_s(key_path, MAX_PATH, L"Software\\Classes\\%s", scheme);
+
+  HKEY hKey;
+  if (::RegCreateKeyEx(HKEY_CURRENT_USER, key_path, 0, nullptr,
+                       REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr, &hKey,
+                       nullptr) == ERROR_SUCCESS) {
+    std::wstring description = L"URL:" + std::wstring(scheme) + L" Protocol";
+    ::RegSetValueEx(hKey, nullptr, 0, REG_SZ,
+                    reinterpret_cast<const BYTE*>(description.c_str()),
+                    static_cast<DWORD>((description.size() + 1) * sizeof(wchar_t)));
+    ::RegSetValueEx(hKey, L"URL Protocol", 0, REG_SZ, nullptr, 0);
+
+    HKEY hCommandKey;
+    if (::RegCreateKeyEx(hKey, L"shell\\open\\command", 0, nullptr,
+                         REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr,
+                         &hCommandKey, nullptr) == ERROR_SUCCESS) {
+      std::wstring command = L"\"" + std::wstring(exe_path) + L"\" \"%1\"";
+      ::RegSetValueEx(hCommandKey, nullptr, 0, REG_SZ,
+                      reinterpret_cast<const BYTE*>(command.c_str()),
+                      static_cast<DWORD>((command.size() + 1) * sizeof(wchar_t)));
+      ::RegCloseKey(hCommandKey);
+    }
+    ::RegCloseKey(hKey);
+  }
 }

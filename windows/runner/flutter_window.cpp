@@ -3,6 +3,8 @@
 #include <optional>
 
 #include "flutter/generated_plugin_registrant.h"
+#include <flutter/method_channel.h>
+#include <flutter/standard_method_codec.h>
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -65,6 +67,27 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     case WM_FONTCHANGE:
       flutter_controller_->engine()->ReloadSystemFonts();
       break;
+    case WM_COPYDATA: {
+      COPYDATASTRUCT* cds = reinterpret_cast<COPYDATASTRUCT*>(lparam);
+      if (cds->dwData == 0) { // 0 matches what we sent in main.cpp
+        std::wstring wstr(static_cast<wchar_t*>(cds->lpData));
+         
+         // Convert wstring to string manually to avoid MSVC warnings about loss of data
+         // Since URLs are generally ASCII, this simple cast loop is safe for standard URLs
+         std::string str;
+         str.reserve(wstr.length());
+         for (wchar_t c : wstr) {
+             str.push_back(static_cast<char>(c));
+         }
+        
+        // Send to Dart via MethodChannel
+        const flutter::StandardMethodCodec& codec = flutter::StandardMethodCodec::GetInstance();
+        flutter::MethodChannel<> channel(
+            flutter_controller_->engine()->messenger(), "com.example.toothfile/deeplink", &codec);
+        channel.InvokeMethod("onDeepLink", std::make_unique<flutter::EncodableValue>(str));
+      }
+      return 0;
+    }
   }
 
   return Win32Window::MessageHandler(hwnd, message, wparam, lparam);

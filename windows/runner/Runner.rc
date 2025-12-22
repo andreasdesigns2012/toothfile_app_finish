@@ -92,9 +92,9 @@ BEGIN
             VALUE "CompanyName", "ToothFile" "\0"
             VALUE "FileDescription", "ToothFile" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "ToothFile" "\0"
+            VALUE "InternalName", "toothfile" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "ToothFile.exe" "\0"
+            VALUE "OriginalFilename", "toothfile.exe" "\0"
             VALUE "ProductName", "ToothFile" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END

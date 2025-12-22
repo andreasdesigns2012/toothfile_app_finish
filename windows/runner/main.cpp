@@ -1,12 +1,41 @@
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
+#include <stdlib.h>
 
 #include "flutter_window.h"
 #include "utils.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
+  // Ensure only one instance of the application is running
+  const wchar_t* kMutexName = L"Local\\ToothFileAppInstance";
+  HANDLE hMutex = ::CreateMutex(nullptr, FALSE, kMutexName);
+  if (::GetLastError() == ERROR_ALREADY_EXISTS) {
+    HWND hwnd = ::FindWindow(L"FLUTTER_RUNNER_WIN32_WINDOW", L"ToothFile");
+    if (hwnd != NULL) {
+      ::ShowWindow(hwnd, SW_NORMAL);
+      ::SetForegroundWindow(hwnd);
+
+      // Forward command line arguments to the running instance
+      if (__argc > 1) {
+        std::wstring args;
+        for (int i = 1; i < __argc; ++i) {
+          args += __wargv[i];
+        }
+
+        COPYDATASTRUCT cds;
+        cds.dwData = 0;
+        cds.cbData = static_cast<DWORD>((args.size() + 1) * sizeof(wchar_t));
+        cds.lpData = (void*)args.c_str();
+
+        ::SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)&cds);
+      }
+    }
+    return EXIT_SUCCESS;
+  }
+  (void)hMutex; // Suppress unused variable warning
+
   // Attach to console when present (e.g., 'flutter run') or create a
   // new console when running with a debugger.
   if (!::AttachConsole(ATTACH_PARENT_PROCESS) && ::IsDebuggerPresent()) {

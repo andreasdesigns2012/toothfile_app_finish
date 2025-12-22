@@ -248,7 +248,7 @@ class PushNotificationService {
         value: user.id,
       ),
       callback: (payload) async {
-        final record = payload.newRecord ?? {};
+        final record = payload.newRecord;
         final fileName = record['file_name']?.toString() ?? 'Dental file';
         final senderId = record['sender_id']?.toString() ?? '';
         final data = {
@@ -287,7 +287,7 @@ class PushNotificationService {
         value: user.id,
       ),
       callback: (payload) async {
-        final record = payload.newRecord ?? {};
+        final record = payload.newRecord;
         final data = {
           'type': 'connection_request',
           'requestId': record['id']?.toString(),
@@ -323,7 +323,7 @@ class PushNotificationService {
         value: 'downloaded',
       ),
       callback: (payload) async {
-        final rec = payload.newRecord ?? {};
+        final rec = payload.newRecord;
         final sfId = rec['shared_file_id']?.toString();
         final trackId = rec['id']?.toString();
         if (trackId != null && _seenDownloads.contains(trackId)) return;
@@ -380,7 +380,7 @@ class PushNotificationService {
         value: user.id,
       ),
       callback: (payload) async {
-        final rec = payload.newRecord ?? {};
+        final rec = payload.newRecord;
         if (rec['status']?.toString() != 'accepted') return;
         final data = {
           'type': 'connection_accepted',

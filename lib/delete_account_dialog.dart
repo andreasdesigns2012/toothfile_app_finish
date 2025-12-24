@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:toothfile/delete_account.dart';
+import 'package:toothfile/touch_bar_helper.dart';
 
 class DeleteAccountDialog extends StatefulWidget {
   const DeleteAccountDialog({super.key});
@@ -40,6 +41,22 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
     _useremail =
         user?.email ?? user?.userMetadata?['email']?.toString() ?? 'email';
     _userid = user?.id ?? user?.userMetadata?['sub']?.toString() ?? 'uid';
+    _updateTouchBar();
+  }
+
+  void _updateTouchBar() {
+    TouchBarHelper.setPopupTouchBar(
+      onCancel: () {
+        if (mounted) Navigator.of(context).pop();
+      },
+      onConfirm: _isConfirmButtonEnabled && !_isLoading
+          ? () {
+              _handleDeleteAccount();
+            }
+          : () {}, // No-op if disabled
+      confirmLabel: 'Delete',
+      confirmColor: _isConfirmButtonEnabled ? Colors.red : Colors.grey,
+    );
   }
 
   @override
@@ -53,6 +70,92 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
     setState(() {
       _isConfirmButtonEnabled = _controller.text == 'DELETE';
     });
+    _updateTouchBar();
+  }
+
+  Future<void> _handleDeleteAccount() async {
+    setState(() => _isLoading = true);
+    _updateTouchBar(); // Disable button on touch bar
+
+    try {
+      await deleteAccount();
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Account deleted successfully',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF16A34A),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _updateTouchBar(); // Re-enable if failed
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Error deleting account: $e',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -369,95 +472,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                     ),
                     child: ElevatedButton(
                       onPressed: _isConfirmButtonEnabled && !_isLoading
-                          ? () async {
-                              setState(() => _isLoading = true);
-                              try {
-                                await deleteAccount();
-                                if (mounted) {
-                                  Navigator.of(context).pop();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white.withOpacity(
-                                                0.2,
-                                              ),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const Icon(
-                                              Icons.check_rounded,
-                                              color: Colors.white,
-                                              size: 20,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          const Expanded(
-                                            child: Text(
-                                              'Account deleted successfully',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      backgroundColor: const Color(0xFF16A34A),
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      margin: const EdgeInsets.all(16),
-                                      elevation: 4,
-                                    ),
-                                  );
-                                }
-                              } catch (e) {
-                                if (mounted) {
-                                  setState(() => _isLoading = false);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white.withOpacity(
-                                                0.2,
-                                              ),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const Icon(
-                                              Icons.error_outline_rounded,
-                                              color: Colors.white,
-                                              size: 20,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Text(
-                                              'Error deleting account: $e',
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      backgroundColor: const Color(0xFFEF4444),
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      margin: const EdgeInsets.all(16),
-                                      elevation: 4,
-                                    ),
-                                  );
-                                }
-                              }
-                            }
+                          ? _handleDeleteAccount
                           : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,

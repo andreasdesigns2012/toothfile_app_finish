@@ -926,7 +926,7 @@ packages:
     source: hosted
     version: "0.3.0-alpha.1"
   touch_bar_platform_interface:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: touch_bar_platform_interface
       sha256: "9456dbca0544dbcbe4930b4385e5c580d4556ee5383718c74b6548a0b998f3f3"

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:toothfile/touch_bar_helper.dart';
 
 class InviteCollaboratorDialog extends StatefulWidget {
   const InviteCollaboratorDialog({super.key});
@@ -21,6 +22,20 @@ class _InviteCollaboratorDialogState extends State<InviteCollaboratorDialog> {
   // Replace with your actual deployed Deno function URL
   static const String denoFunctionUrl =
       'https://ikqsbkfnjamvkevsxqpr.supabase.co/functions/v1/invite-user';
+
+  @override
+  void initState() {
+    super.initState();
+    TouchBarHelper.setPopupTouchBar(
+      onCancel: () {
+        if (mounted) Navigator.of(context).pop();
+      },
+      onConfirm: () {
+        _sendInvitation();
+      },
+      confirmLabel: 'Invite',
+    );
+  }
 
   @override
   void dispose() {

@@ -82,12 +82,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   @override
-  void initState() {
-    super.initState();
-    TouchBarHelper.setupTouchBar();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'ToothFile',

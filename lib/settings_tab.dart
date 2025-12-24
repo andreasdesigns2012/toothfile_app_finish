@@ -8,7 +8,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:toothfile/push_notification_service.dart';
 
 class SettingsTab extends StatefulWidget {
-  const SettingsTab({super.key});
+  final VoidCallback? onRestoreTouchBar;
+  const SettingsTab({super.key, this.onRestoreTouchBar});
 
   @override
   State<SettingsTab> createState() => _SettingsTabState();
@@ -1236,7 +1237,9 @@ class _SettingsTabState extends State<SettingsTab> {
                                 builder: (BuildContext context) {
                                   return const DeleteAccountDialog();
                                 },
-                              );
+                              ).then((_) {
+                                widget.onRestoreTouchBar?.call();
+                              });
                             },
                             icon: const Icon(Icons.delete_rounded, size: 18),
                             label: const Text(

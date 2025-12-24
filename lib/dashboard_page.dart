@@ -12,6 +12,7 @@ import 'package:toothfile/requests_tab.dart';
 import 'package:toothfile/directory_tab.dart';
 import 'package:toothfile/order_form_tab.dart';
 import 'package:toothfile/settings_tab.dart';
+import 'package:toothfile/touch_bar_helper.dart';
 
 class DashboardPage extends StatefulWidget {
   final int? initialIndex;
@@ -31,14 +32,14 @@ class _DashboardPageState extends State<DashboardPage> {
   final GlobalKey _menuButtonKey = GlobalKey();
   OverlayEntry? _overlayEntry;
 
-  final List<Widget> _pages = [
+  List<Widget> get _pages => [
     const ReceivedFilesTab(),
     const SendFilesTab(),
     const FileTrackerTab(),
     const RequestsTab(),
     const DirectoryTab(),
     const OrderFormTab(),
-    const SettingsTab(),
+    SettingsTab(onRestoreTouchBar: _setTouchBar),
   ];
 
   @override
@@ -53,6 +54,19 @@ class _DashboardPageState extends State<DashboardPage> {
     _userEmail = user?.email ?? '';
     _userInitials = _userName.isNotEmpty ? _userName[0].toUpperCase() : 'U';
     _selectedIndex = widget.initialIndex ?? 0;
+    _setTouchBar();
+  }
+
+  void _setTouchBar() {
+    TouchBarHelper.setDashboardTouchBar(
+      onTabSelected: (index) {
+        if (index >= 0 && index < _pages.length) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        }
+      },
+    );
   }
 
   @override
@@ -183,7 +197,9 @@ class _DashboardPageState extends State<DashboardPage> {
                           builder: (BuildContext context) {
                             return const InviteCollaboratorDialog();
                           },
-                        );
+                        ).then((_) {
+                          _setTouchBar();
+                        });
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(

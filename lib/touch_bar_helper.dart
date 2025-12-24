@@ -38,7 +38,7 @@ class TouchBarHelper {
               onTabSelected(index);
             },
             selectedStyle: ScrubberSelectionStyle.outlineOverlay,
-            mode: ScrubberMode.free,
+            mode: ScrubberMode.fixed,
             showArrowButtons: true,
           ),
         ],

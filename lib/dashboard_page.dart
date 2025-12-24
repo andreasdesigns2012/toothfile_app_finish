@@ -55,7 +55,10 @@ class _DashboardPageState extends State<DashboardPage> {
     _userInitials = _userName.isNotEmpty ? _userName[0].toUpperCase() : 'U';
     _selectedIndex = widget.initialIndex ?? 0;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _setTouchBar();
+      // Small delay to ensure window is ready and focused on macOS
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) _setTouchBar();
+      });
     });
   }
 

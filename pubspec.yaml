@@ -52,6 +52,7 @@ dependencies:
   shared_preferences: ^2.2.2
   nfc_manager_ndef: ^1.1.0
   app_links: ^6.4.1
+  touch_bar: ^0.3.0-alpha.1
  
 
 dev_dependencies:

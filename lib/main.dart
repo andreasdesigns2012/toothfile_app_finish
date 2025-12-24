@@ -9,6 +9,7 @@ import 'package:toothfile/supabase_auth_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:toothfile/push_notification_service.dart';
+import 'package:toothfile/touch_bar_helper.dart';
 
 // Optional local notifications for mobile platforms only
 // Removed global plugin setup on desktop to avoid unsupported initialization
@@ -37,6 +38,14 @@ Future<void> main() async {
         }
       }
     });
+  }
+
+  // Set up deep link handling for macOS
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
+    // Note: The app_links package should be used to listen for deep links on macOS
+    // However, since we don't have it installed/configured yet, we rely on the
+    // default deep link handling which usually passes the URL to the app.
+    // If you need specific handling, consider adding 'app_links' or 'uni_links'.
   }
 
   if (kIsWeb ||
@@ -72,6 +81,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    TouchBarHelper.setupTouchBar();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

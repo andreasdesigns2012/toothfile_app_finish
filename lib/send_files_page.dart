@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:uuid/uuid.dart';
 import 'package:archive/archive.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:toothfile/touch_bar_helper.dart';
 
 class SendFilesDialog extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -26,6 +27,25 @@ class _SendFilesDialogState extends State<SendFilesDialog> {
   List<String> _selectedTeeth = [];
   final TextEditingController _messageController = TextEditingController();
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    TouchBarHelper.setPopupTouchBar(
+      context: context,
+      actions: [
+        TouchBarHelperAction(
+          label: 'Cancel',
+          action: () => Navigator.of(context).pop(),
+        ),
+        TouchBarHelperAction(
+          label: 'Send Files',
+          action: () => _uploadFilesAndCreateOrder(),
+          isPrimary: true,
+        ),
+      ],
+    );
+  }
 
   final Map<String, List<String>> _toothColorGroups = {
     'A': ['A1', 'A2', 'A3', 'A3.5', 'A4'],

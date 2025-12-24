@@ -46,16 +46,24 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
 
   void _updateTouchBar() {
     TouchBarHelper.setPopupTouchBar(
-      onCancel: () {
-        if (mounted) Navigator.of(context).pop();
-      },
-      onConfirm: _isConfirmButtonEnabled && !_isLoading
-          ? () {
-              _handleDeleteAccount();
-            }
-          : () {}, // No-op if disabled
-      confirmLabel: 'Delete',
-      confirmColor: _isConfirmButtonEnabled ? Colors.red : Colors.grey,
+      context: context,
+      actions: [
+        TouchBarHelperAction(
+          label: 'Cancel',
+          action: () {
+            if (mounted) Navigator.of(context).pop();
+          },
+        ),
+        TouchBarHelperAction(
+          label: 'Delete',
+          action: _isConfirmButtonEnabled && !_isLoading
+              ? () {
+                  _handleDeleteAccount();
+                }
+              : () {},
+          isDestructive: _isConfirmButtonEnabled,
+        ),
+      ],
     );
   }
 

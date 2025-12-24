@@ -27,13 +27,22 @@ class _InviteCollaboratorDialogState extends State<InviteCollaboratorDialog> {
   void initState() {
     super.initState();
     TouchBarHelper.setPopupTouchBar(
-      onCancel: () {
-        if (mounted) Navigator.of(context).pop();
-      },
-      onConfirm: () {
-        _sendInvitation();
-      },
-      confirmLabel: 'Invite',
+      context: context,
+      actions: [
+        TouchBarHelperAction(
+          label: 'Cancel',
+          action: () {
+            if (mounted) Navigator.of(context).pop();
+          },
+        ),
+        TouchBarHelperAction(
+          label: 'Invite',
+          action: () {
+            _sendInvitation();
+          },
+          isPrimary: true,
+        ),
+      ],
     );
   }
 

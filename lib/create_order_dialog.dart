@@ -6,6 +6,7 @@ import 'package:toothfile/order_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:toothfile/touch_bar_helper.dart';
 
 class CreateOrderDialog extends StatefulWidget {
   final Function(Order) onOrderCreated;
@@ -33,6 +34,20 @@ class _CreateOrderDialogState extends State<CreateOrderDialog> {
   @override
   void initState() {
     super.initState();
+    TouchBarHelper.setPopupTouchBar(
+      context: context,
+      actions: [
+        TouchBarHelperAction(
+          label: 'Cancel',
+          action: () => Navigator.of(context).pop(),
+        ),
+        TouchBarHelperAction(
+          label: 'Create Order',
+          action: () => _createOrder(),
+          isPrimary: true,
+        ),
+      ],
+    );
     _fetchDentalTechnicians();
   }
 

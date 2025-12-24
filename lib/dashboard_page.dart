@@ -54,6 +54,14 @@ class _DashboardPageState extends State<DashboardPage> {
     _userEmail = user?.email ?? '';
     _userInitials = _userName.isNotEmpty ? _userName[0].toUpperCase() : 'U';
     _selectedIndex = widget.initialIndex ?? 0;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setTouchBar();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _setTouchBar();
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:toothfile/Dental Chart/tooth_selection.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:toothfile/touch_bar_helper.dart';
 import 'dart:developer';
 
 class EditOrderDialog extends StatefulWidget {
@@ -346,6 +347,20 @@ class _EditOrderDialogState extends State<EditOrderDialog> {
   @override
   void initState() {
     super.initState();
+    TouchBarHelper.setPopupTouchBar(
+      context: context,
+      actions: [
+        TouchBarHelperAction(
+          label: 'Cancel',
+          action: () => Navigator.of(context).pop(),
+        ),
+        TouchBarHelperAction(
+          label: 'Save Changes',
+          action: () => _updateOrder(),
+          isPrimary: true,
+        ),
+      ],
+    );
     _customerNameController = TextEditingController(
       text: widget.order.customerName,
     );

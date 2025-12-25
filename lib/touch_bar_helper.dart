@@ -24,6 +24,7 @@ class TouchBarHelper {
 
   static void setCurrentTabIndex(int index) {
     _currentTabIndex = index;
+    debugPrint('TouchBarHelper: Set current tab index to $index');
   }
 
   static void setDashboardTouchBar({
@@ -31,31 +32,47 @@ class TouchBarHelper {
     List<TouchBarItem>? extraItems,
     int? currentTabIndex,
   }) {
-    if (defaultTargetPlatform != TargetPlatform.macOS) return;
+    debugPrint('TouchBarHelper: setDashboardTouchBar called');
+    debugPrint('Platform: ${defaultTargetPlatform}');
+    debugPrint('Is macOS: ${defaultTargetPlatform == TargetPlatform.macOS}');
+
+    // Only proceed on macOS
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      debugPrint('TouchBarHelper: Not macOS, skipping TouchBar setup');
+      return;
+    }
 
     try {
       final callback = onTabSelected ?? onTabSelect;
-      if (callback == null) return;
+      if (callback == null) {
+        debugPrint('TouchBarHelper: No callback provided');
+        return;
+      }
 
       // Store the current tab index for future reference
       if (currentTabIndex != null) {
         _currentTabIndex = currentTabIndex;
       }
 
+      debugPrint('TouchBarHelper: Creating TouchBar with tab navigation');
+      debugPrint('TouchBarHelper: Current tab index: $_currentTabIndex');
+
+      // Create the TouchBar with tab navigation
       final touchBar = TouchBar(
         children: [
-          TouchBarLabel('Dashboard', textColor: Colors.blue),
+          TouchBarLabel('ToothFile', textColor: Colors.blue),
           TouchBarScrubber(
             children: [
-              TouchBarScrubberLabel('Received'),
-              TouchBarScrubberLabel('Send'),
-              TouchBarScrubberLabel('Tracker'),
-              TouchBarScrubberLabel('Requests'),
-              TouchBarScrubberLabel('Directory'),
-              TouchBarScrubberLabel('Order'),
-              TouchBarScrubberLabel('Settings'),
+              TouchBarScrubberLabel('📥 Received'),
+              TouchBarScrubberLabel('📤 Send'),
+              TouchBarScrubberLabel('📊 Tracker'),
+              TouchBarScrubberLabel('🔔 Requests'),
+              TouchBarScrubberLabel('👥 Directory'),
+              TouchBarScrubberLabel('📋 Order'),
+              TouchBarScrubberLabel('⚙️ Settings'),
             ],
             onSelect: (index) {
+              debugPrint('TouchBarHelper: Tab selected: $index');
               callback(index);
             },
             selectedStyle: ScrubberSelectionStyle.outlineOverlay,
@@ -69,9 +86,24 @@ class TouchBarHelper {
         ],
       );
 
+      debugPrint('TouchBarHelper: Setting TouchBar');
       setTouchBar(touchBar);
-    } catch (e) {
-      debugPrint('Error setting dashboard Touch Bar: $e');
+      debugPrint('TouchBarHelper: TouchBar set successfully');
+    } catch (e, stackTrace) {
+      debugPrint('TouchBarHelper: Error setting dashboard Touch Bar: $e');
+      debugPrint('TouchBarHelper: Stack trace: $stackTrace');
+
+      // Try to set a minimal TouchBar as fallback
+      try {
+        debugPrint('TouchBarHelper: Trying fallback TouchBar');
+        final fallbackTouchBar = TouchBar(
+          children: [TouchBarLabel('ToothFile')],
+        );
+        setTouchBar(fallbackTouchBar);
+        debugPrint('TouchBarHelper: Fallback TouchBar set successfully');
+      } catch (fallbackError) {
+        debugPrint('TouchBarHelper: Fallback also failed: $fallbackError');
+      }
     }
   }
 
@@ -79,7 +111,11 @@ class TouchBarHelper {
     required BuildContext? context,
     required List<TouchBarHelperAction> actions,
   }) {
-    if (defaultTargetPlatform != TargetPlatform.macOS) return;
+    debugPrint('TouchBarHelper: setPopupTouchBar called');
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      debugPrint('TouchBarHelper: Not macOS, skipping popup TouchBar');
+      return;
+    }
 
     try {
       final touchBar = TouchBar(
@@ -100,19 +136,25 @@ class TouchBarHelper {
       );
 
       setTouchBar(touchBar);
+      debugPrint('TouchBarHelper: Popup TouchBar set successfully');
     } catch (e) {
-      debugPrint('Error setting popup Touch Bar: $e');
+      debugPrint('TouchBarHelper: Error setting popup Touch Bar: $e');
     }
   }
 
   static void restoreDefaultTouchBar() {
-    if (defaultTargetPlatform != TargetPlatform.macOS) return;
+    debugPrint('TouchBarHelper: restoreDefaultTouchBar called');
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      debugPrint('TouchBarHelper: Not macOS, skipping restore');
+      return;
+    }
 
     try {
       final touchBar = TouchBar(children: [TouchBarLabel('ToothFile')]);
       setTouchBar(touchBar);
+      debugPrint('TouchBarHelper: Default TouchBar restored');
     } catch (e) {
-      debugPrint('Error restoring Touch Bar: $e');
+      debugPrint('TouchBarHelper: Error restoring Touch Bar: $e');
     }
   }
 }

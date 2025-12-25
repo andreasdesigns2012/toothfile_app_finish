@@ -79,6 +79,7 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _setTouchBar() {
+    debugPrint('DashboardPage: _setTouchBar called with index $_selectedIndex');
     TouchBarHelper.setDashboardTouchBar(currentTabIndex: _selectedIndex);
   }
 
@@ -479,6 +480,7 @@ class _DashboardPageState extends State<DashboardPage> {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
+          debugPrint('DashboardPage: Tab tapped, index: $index');
           setState(() {
             _selectedIndex = index;
             if (_isMenuOpen) {

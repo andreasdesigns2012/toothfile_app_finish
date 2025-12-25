@@ -13,7 +13,6 @@ import 'package:toothfile/directory_tab.dart';
 import 'package:toothfile/order_form_tab.dart';
 import 'package:toothfile/settings_tab.dart';
 import 'package:toothfile/touch_bar_helper.dart';
-import 'package:toothfile/touch_bar_widget.dart';
 
 class DashboardPage extends StatefulWidget {
   final int? initialIndex;
@@ -80,8 +79,7 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _setTouchBar() {
-    debugPrint('DashboardPage: _setTouchBar called with index $_selectedIndex');
-    TouchBarHelper.setDashboardTouchBar(currentTabIndex: _selectedIndex);
+    TouchBarHelper.setDashboardTouchBar();
   }
 
   @override
@@ -472,12 +470,6 @@ class _DashboardPageState extends State<DashboardPage> {
           Expanded(child: _pages[_selectedIndex]),
         ],
       ),
-
-      // TouchBar widget overlay (macOS only)
-      floatingActionButton: defaultTargetPlatform == TargetPlatform.macOS
-          ? TouchBarHelper.createTouchBarWidget()
-          : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -487,14 +479,11 @@ class _DashboardPageState extends State<DashboardPage> {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          debugPrint('DashboardPage: Tab tapped, index: $index');
           setState(() {
             _selectedIndex = index;
             if (_isMenuOpen) {
               _removeOverlay();
             }
-            TouchBarHelper.setCurrentTabIndex(index);
-            TouchBarHelper.setDashboardTouchBar(currentTabIndex: index);
           });
         },
         borderRadius: BorderRadius.circular(8),

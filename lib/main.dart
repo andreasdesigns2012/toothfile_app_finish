@@ -601,19 +601,19 @@ class _AuthPageState extends State<AuthPage> {
           const SizedBox(height: 24),
           Row(
             children: [
-              Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+              Expanded(child: Divider(color: const Color(0xFFE2E8F0))),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   'OR',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Color(0xFF94A3B8),
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
-              Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+              Expanded(child: Divider(color: const Color(0xFFE2E8F0))),
             ],
           ),
           const SizedBox(height: 24),

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'touch_bar_widget.dart';
+import 'package:touch_bar/touch_bar.dart';
 
 class TouchBarHelperAction {
   final String label;
@@ -18,90 +18,218 @@ class TouchBarHelperAction {
 
 class TouchBarHelper {
   static Function(int)? onTabSelect;
-  static int _currentTabIndex = 0;
-  static TouchBarManager _touchBarManager = TouchBarManager();
 
-  static int get currentTabIndex => _currentTabIndex;
-
-  static void setCurrentTabIndex(int index) {
-    _currentTabIndex = index;
-    debugPrint('TouchBarHelper: Set current tab index to $index');
-  }
-
-  /// Creates a TouchBar widget that can be embedded in the UI
-  static Widget createTouchBarWidget() {
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
-      debugPrint('TouchBarHelper: Not macOS, returning empty widget');
-      return const SizedBox.shrink();
-    }
-
-    debugPrint('TouchBarHelper: Creating TouchBar widget');
-
-    return TouchBarWidget(
-      currentIndex: _currentTabIndex,
-      onTabSelected: (index) {
-        debugPrint('TouchBarHelper: Tab selected: $index');
-        if (onTabSelect != null) {
-          onTabSelect!(index);
-        }
-      },
-      tabLabels: _touchBarManager.tabLabels,
-      tabIcons: _touchBarManager.tabIcons,
-    );
-  }
-
-  /// Sets up the TouchBar (now just updates the internal state)
   static void setDashboardTouchBar({
     Function(int)? onTabSelected,
-    List<dynamic>? extraItems,
-    int? currentTabIndex,
+    List<TouchBarItem>? extraItems,
   }) {
-    debugPrint('TouchBarHelper: setDashboardTouchBar called');
-    debugPrint('Platform: ${defaultTargetPlatform}');
-    debugPrint('Is macOS: ${defaultTargetPlatform == TargetPlatform.macOS}');
-
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
-      debugPrint('TouchBarHelper: Not macOS, skipping TouchBar setup');
-      return;
-    }
+    if (defaultTargetPlatform != TargetPlatform.macOS) return;
 
     try {
-      // Store the current tab index for future reference
-      if (currentTabIndex != null) {
-        _currentTabIndex = currentTabIndex;
-      }
+      final callback = onTabSelected ?? onTabSelect;
+      if (callback == null) return;
 
-      // Set the callback
-      if (onTabSelected != null) {
-        onTabSelect = onTabSelected;
-      }
+      final touchBar = TouchBar(
+        children: [
+          TouchBarLabel('Dashboard', textColor: Colors.blue),
+          TouchBarScrubber(
+            children: [
+              TouchBarScrubberLabel('Received'),
+              TouchBarScrubberLabel('Send'),
+              TouchBarScrubberLabel('Tracker'),
+              TouchBarScrubberLabel('Requests'),
+              TouchBarScrubberLabel('Directory'),
+              TouchBarScrubberLabel('Order'),
+              TouchBarScrubberLabel('Settings'),
+            ],
+            onSelect: (index) {
+              callback(index);
+            },
+            selectedStyle: ScrubberSelectionStyle.outlineOverlay,
+            mode: ScrubberMode.fixed,
+            showArrowButtons: true,
+          ),
+          if (extraItems != null && extraItems.isNotEmpty) ...[
+            TouchBarSpace.flexible(),
+            ...extraItems,
+          ],
+        ],
+      );
 
-      debugPrint(
-        'TouchBarHelper: TouchBar state updated for tab $_currentTabIndex',
-      );
-      debugPrint(
-        'TouchBarHelper: TouchBar widget will be available via createTouchBarWidget()',
-      );
+      setTouchBar(touchBar);
     } catch (e) {
-      debugPrint('TouchBarHelper: Error updating TouchBar state: $e');
+      debugPrint('Error setting dashboard Touch Bar: $e');
     }
   }
 
-  /// Sets popup TouchBar (deprecated - use regular TouchBar)
   static void setPopupTouchBar({
     required BuildContext? context,
     required List<TouchBarHelperAction> actions,
   }) {
-    debugPrint('TouchBarHelper: setPopupTouchBar called (deprecated)');
-    // This is now handled by the regular TouchBar widget
+    if (defaultTargetPlatform != TargetPlatform.macOS) return;
+
+    try {
+      final touchBar = TouchBar(
+        children: [
+          for (int i = 0; i < actions.length; i++) ...[
+            TouchBarButton(
+              label: actions[i].label,
+              backgroundColor: actions[i].isDestructive
+                  ? Colors.red
+                  : actions[i].isPrimary
+                  ? Colors.blue
+                  : Colors.grey,
+              onClick: actions[i].action,
+            ),
+            if (i < actions.length - 1) TouchBarSpace.flexible(),
+          ],
+        ],
+      );
+
+      setTouchBar(touchBar);
+    } catch (e) {
+      debugPrint('Error setting popup Touch Bar: $e');
+    }
   }
 
-  /// Restores default TouchBar state
+  static void clearTouchBar() {
+    if (defaultTargetPlatform != TargetPlatform.macOS) return;
+
+    try {
+      final touchBar = TouchBar(children: []);
+      setTouchBar(touchBar);
+    } catch (e) {
+      debugPrint('Error clearing Touch Bar: $e');
+    }
+  }
+
   static void restoreDefaultTouchBar() {
-    debugPrint('TouchBarHelper: restoreDefaultTouchBar called');
-    _currentTabIndex = 0;
-    if (onTabSelect != null) {
-      onTabSelect!(0);
+    if (defaultTargetPlatform != TargetPlatform.macOS) return;
+
+    try {
+      final touchBar = TouchBar(children: [TouchBarLabel('ToothFile')]);
+      setTouchBar(touchBar);
+    } catch (e) {
+      debugPrint('Error restoring Touch Bar: $e');
+    }
+  }
+
+  static Future<T?> showDialogWithTouchBar<T>({
+    required BuildContext context,
+    required WidgetBuilder builder,
+    required List<TouchBarHelperAction> touchBarActions,
+    bool barrierDismissible = true,
+    Color? barrierColor,
+    String? barrierLabel,
+    bool useSafeArea = true,
+    bool useRootNavigator = true,
+    RouteSettings? routeSettings,
+    Offset? anchorPoint,
+  }) async {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      return showDialog<T>(
+        context: context,
+        builder: builder,
+        barrierDismissible: barrierDismissible,
+        barrierColor: barrierColor,
+        barrierLabel: barrierLabel,
+        useSafeArea: useSafeArea,
+        useRootNavigator: useRootNavigator,
+        routeSettings: routeSettings,
+        anchorPoint: anchorPoint,
+      );
+    }
+
+    // Set popup TouchBar before showing dialog
+    setPopupTouchBar(context: context, actions: touchBarActions);
+
+    try {
+      final result = await showDialog<T>(
+        context: context,
+        builder: builder,
+        barrierDismissible: barrierDismissible,
+        barrierColor: barrierColor,
+        barrierLabel: barrierLabel,
+        useSafeArea: useSafeArea,
+        useRootNavigator: useRootNavigator,
+        routeSettings: routeSettings,
+        anchorPoint: anchorPoint,
+      );
+
+      // Clear TouchBar when dialog is closed
+      clearTouchBar();
+      return result;
+    } catch (e) {
+      // Ensure TouchBar is cleared even if dialog throws an error
+      clearTouchBar();
+      rethrow;
+    }
+  }
+
+  static Future<T?> showModalBottomSheetWithTouchBar<T>({
+    required BuildContext context,
+    required WidgetBuilder builder,
+    required List<TouchBarHelperAction> touchBarActions,
+    Color? backgroundColor,
+    double? elevation,
+    ShapeBorder? shape,
+    Clip? clipBehavior,
+    Color? barrierColor,
+    bool isScrollControlled = false,
+    bool useRootNavigator = false,
+    bool isDismissible = true,
+    bool enableDrag = true,
+    RouteSettings? routeSettings,
+    AnimationController? transitionAnimationController,
+    Offset? anchorPoint,
+  }) async {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      return showModalBottomSheet<T>(
+        context: context,
+        builder: builder,
+        backgroundColor: backgroundColor,
+        elevation: elevation,
+        shape: shape,
+        clipBehavior: clipBehavior,
+        barrierColor: barrierColor,
+        isScrollControlled: isScrollControlled,
+        useRootNavigator: useRootNavigator,
+        isDismissible: isDismissible,
+        enableDrag: enableDrag,
+        routeSettings: routeSettings,
+        transitionAnimationController: transitionAnimationController,
+        anchorPoint: anchorPoint,
+      );
+    }
+
+    // Set popup TouchBar before showing bottom sheet
+    setPopupTouchBar(context: context, actions: touchBarActions);
+
+    try {
+      final result = await showModalBottomSheet<T>(
+        context: context,
+        builder: builder,
+        backgroundColor: backgroundColor,
+        elevation: elevation,
+        shape: shape,
+        clipBehavior: clipBehavior,
+        barrierColor: barrierColor,
+        isScrollControlled: isScrollControlled,
+        useRootNavigator: useRootNavigator,
+        isDismissible: isDismissible,
+        enableDrag: enableDrag,
+        routeSettings: routeSettings,
+        transitionAnimationController: transitionAnimationController,
+        anchorPoint: anchorPoint,
+      );
+
+      // Clear TouchBar when bottom sheet is closed
+      clearTouchBar();
+      return result;
+    } catch (e) {
+      // Ensure TouchBar is cleared even if bottom sheet throws an error
+      clearTouchBar();
+      rethrow;
     }
   }
 }

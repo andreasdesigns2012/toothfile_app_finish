@@ -30,7 +30,6 @@ class _SendFilesTabState extends State<SendFilesTab> {
 
   void _updateTouchBar() {
     TouchBarHelper.setDashboardTouchBar(
-      currentTabIndex: 1,
       extraItems: [
         TouchBarButton(label: 'Refresh', onClick: _fetchUsers),
         TouchBarButton(

@@ -55,7 +55,6 @@ class _SettingsTabState extends State<SettingsTab> {
 
   void _updateTouchBar() {
     TouchBarHelper.setDashboardTouchBar(
-      currentTabIndex: 6,
       extraItems: [
         TouchBarButton(
           label: 'Save Profile',

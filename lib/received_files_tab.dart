@@ -34,7 +34,6 @@ class _ReceivedFilesTabState extends State<ReceivedFilesTab> {
 
   void _updateTouchBar() {
     TouchBarHelper.setDashboardTouchBar(
-      currentTabIndex: 0,
       extraItems: [
         TouchBarButton(label: 'Refresh', onClick: _fetchReceivedFiles),
       ],
@@ -111,111 +110,116 @@ class _ReceivedFilesTabState extends State<ReceivedFilesTab> {
   }
 
   Future<void> _deleteFile(String fileId, String fileName) async {
-    final confirm =
-        await showModalBottomSheet<bool>(
-          context: context,
-          backgroundColor: Colors.transparent,
-          builder: (context) => Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    final confirm = await TouchBarHelper.showModalBottomSheetWithTouchBar<bool>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      touchBarActions: [
+        TouchBarHelperAction(
+          label: 'Cancel',
+          action: () => Navigator.pop(context, false),
+        ),
+        TouchBarHelperAction(
+          label: 'Delete',
+          action: () => Navigator.pop(context, true),
+          isDestructive: true,
+        ),
+      ],
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE2E8F0),
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFEE2E2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.delete_rounded,
+                color: Color(0xFFEF4444),
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Delete File?',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF020817),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Are you sure you want to delete "$fileName"? This action cannot be undone.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+            ),
+            const SizedBox(height: 24),
+            Row(
               children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE2E8F0),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFEE2E2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.delete_rounded,
-                    color: Color(0xFFEF4444),
-                    size: 32,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Delete File?',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF020817),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Are you sure you want to delete "$fileName"? This action cannot be undone.',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF64748B),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          side: const BorderSide(color: Color(0xFFE2E8F0)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF64748B),
-                          ),
-                        ),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: const BorderSide(color: Color(0xFFE2E8F0)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFEF4444),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          'Delete',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF64748B),
                       ),
                     ),
-                  ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEF4444),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Delete',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-        ).then((_) {
-          _updateTouchBar();
-        });
+          ],
+        ),
+      ),
+    );
 
     if (confirm == true) {
       try {
@@ -699,20 +703,17 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
         (file['selected_teeth'] as List?)?.join(', ') ?? 'N/A';
     final toothColor = file['tooth_color'] ?? 'N/A';
 
-    showModalBottomSheet(
+    TouchBarHelper.showModalBottomSheetWithTouchBar(
       context: context,
       backgroundColor: Colors.transparent,
+      touchBarActions: [
+        TouchBarHelperAction(
+          label: 'Done',
+          action: () => Navigator.pop(context),
+          isPrimary: true,
+        ),
+      ],
       builder: (context) {
-        TouchBarHelper.setPopupTouchBar(
-          context: context,
-          actions: [
-            TouchBarHelperAction(
-              label: 'Done',
-              action: () => Navigator.pop(context),
-              isPrimary: true,
-            ),
-          ],
-        );
         return Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -982,10 +983,12 @@ class _ReceivedFileCardState extends State<ReceivedFileCard> {
                       color: Color(0xFF0F172A),
                     ),
                     onPressed: () {
-                      showModalBottomSheet(
+                      TouchBarHelper.showModalBottomSheetWithTouchBar(
                         context: context,
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
+                        touchBarActions:
+                            [], // No touchbar actions for this dialog
                         builder: (context) =>
                             ForwardDialog(fileRecord: widget.file),
                       ).then((_) {

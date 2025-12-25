@@ -29,7 +29,6 @@ class _DirectoryTabState extends State<DirectoryTab> {
 
   void _updateTouchBar() {
     TouchBarHelper.setDashboardTouchBar(
-      currentTabIndex: 4,
       extraItems: [
         TouchBarButton(label: 'Refresh', onClick: _loadUsers),
         TouchBarButton(

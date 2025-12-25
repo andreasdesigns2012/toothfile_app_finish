@@ -13,6 +13,7 @@ import 'package:toothfile/directory_tab.dart';
 import 'package:toothfile/order_form_tab.dart';
 import 'package:toothfile/settings_tab.dart';
 import 'package:toothfile/touch_bar_helper.dart';
+import 'package:toothfile/touch_bar_widget.dart';
 
 class DashboardPage extends StatefulWidget {
   final int? initialIndex;
@@ -471,6 +472,12 @@ class _DashboardPageState extends State<DashboardPage> {
           Expanded(child: _pages[_selectedIndex]),
         ],
       ),
+
+      // TouchBar widget overlay (macOS only)
+      floatingActionButton: defaultTargetPlatform == TargetPlatform.macOS
+          ? TouchBarHelper.createTouchBarWidget()
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 

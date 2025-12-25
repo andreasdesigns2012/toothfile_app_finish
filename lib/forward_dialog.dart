@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:toothfile/touch_bar_helper.dart';
+import 'package:touch_bar/touch_bar.dart';
 
 class ForwardDialog extends StatefulWidget {
   final Map<String, dynamic>? fileRecord;
@@ -29,6 +31,25 @@ class _ForwardDialogState extends State<ForwardDialog> {
   void initState() {
     super.initState();
     _loadConnections();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateTouchBar());
+  }
+
+  void _updateTouchBar() {
+    TouchBarHelper.setPopupTouchBar(
+      context: context,
+      actions: [
+        TouchBarHelperAction(
+          label: 'Cancel',
+          action: () => Navigator.pop(context),
+        ),
+        if (_selectedUserId != null)
+          TouchBarHelperAction(
+            label: 'Forward',
+            action: _forward,
+            isPrimary: true,
+          ),
+      ],
+    );
   }
 
   @override
@@ -533,7 +554,10 @@ class _ForwardDialogState extends State<ForwardDialog> {
                                 ],
                         ),
                         child: InkWell(
-                          onTap: () => setState(() => _selectedUserId = id),
+                          onTap: () {
+                            setState(() => _selectedUserId = id);
+                            _updateTouchBar();
+                          },
                           borderRadius: BorderRadius.circular(12),
                           child: Padding(
                             padding: const EdgeInsets.all(14),

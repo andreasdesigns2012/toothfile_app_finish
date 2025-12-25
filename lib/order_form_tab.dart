@@ -17,6 +17,9 @@ import 'package:uuid/uuid.dart';
 import 'dart:convert';
 import 'forward_dialog.dart';
 
+import 'package:toothfile/touch_bar_helper.dart';
+import 'package:touch_bar/touch_bar.dart';
+
 class OrderFormTab extends StatefulWidget {
   const OrderFormTab({super.key});
 
@@ -36,6 +39,22 @@ class _OrderFormTabState extends State<OrderFormTab> {
     super.initState();
     _searchController = TextEditingController();
     _fetchOrders();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateTouchBar());
+  }
+
+  void _updateTouchBar() {
+    TouchBarHelper.setDashboardTouchBar(
+      extraItems: [
+        TouchBarButton(
+          label: 'New Order',
+          backgroundColor: Colors.blue,
+          onClick: _showCreateOrderSheet,
+        ),
+        TouchBarButton(label: 'Refresh', onClick: _fetchOrders),
+        if (!kIsWeb && (Platform.isMacOS || Platform.isIOS))
+          TouchBarButton(label: 'Import NFC', onClick: _importOrderFromNfc),
+      ],
+    );
   }
 
   @override
@@ -1138,7 +1157,9 @@ class _OrderFormTabState extends State<OrderFormTab> {
           },
         );
       },
-    );
+    ).then((_) {
+      _updateTouchBar();
+    });
   }
 
   @override
@@ -2018,7 +2039,11 @@ class OrderCard extends StatelessWidget {
                                       >()
                                     ?.._fetchOrders()),
                             ),
-                          );
+                          ).then((_) {
+                            context
+                                .findAncestorStateOfType<_OrderFormTabState>()
+                                ?._updateTouchBar();
+                          });
                         },
                         padding: const EdgeInsets.all(8),
                         constraints: const BoxConstraints(),
@@ -2054,7 +2079,11 @@ class OrderCard extends StatelessWidget {
                                 },
                               );
                             },
-                          );
+                          ).then((_) {
+                            context
+                                .findAncestorStateOfType<_OrderFormTabState>()
+                                ?._updateTouchBar();
+                          });
                         },
                         padding: const EdgeInsets.all(8),
                         constraints: const BoxConstraints(),

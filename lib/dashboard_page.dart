@@ -39,7 +39,7 @@ class _DashboardPageState extends State<DashboardPage> {
     const RequestsTab(),
     const DirectoryTab(),
     const OrderFormTab(),
-    SettingsTab(onRestoreTouchBar: _setTouchBar),
+    const SettingsTab(),
   ];
 
   @override
@@ -54,6 +54,16 @@ class _DashboardPageState extends State<DashboardPage> {
     _userEmail = user?.email ?? '';
     _userInitials = _userName.isNotEmpty ? _userName[0].toUpperCase() : 'U';
     _selectedIndex = widget.initialIndex ?? 0;
+
+    // Set up global TouchBar callback
+    TouchBarHelper.onTabSelect = (index) {
+      if (index >= 0 && index < _pages.length) {
+        setState(() {
+          _selectedIndex = index;
+        });
+      }
+    };
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Small delay to ensure window is ready and focused on macOS
       Future.delayed(const Duration(milliseconds: 500), () {
@@ -69,19 +79,12 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _setTouchBar() {
-    TouchBarHelper.setDashboardTouchBar(
-      onTabSelected: (index) {
-        if (index >= 0 && index < _pages.length) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        }
-      },
-    );
+    TouchBarHelper.setDashboardTouchBar();
   }
 
   @override
   void dispose() {
+    TouchBarHelper.onTabSelect = null;
     _removeOverlay();
     super.dispose();
   }

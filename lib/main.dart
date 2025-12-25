@@ -138,6 +138,302 @@ class _AuthPageState extends State<AuthPage> {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
         }
       };
+
+    // Initialize TouchBar after frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateTouchBar();
+    });
+  }
+
+  void _updateTouchBar() {
+    TouchBarHelper.setPopupTouchBar(
+      context: context,
+      actions: [
+        TouchBarHelperAction(
+          label: _isSignInSelected ? 'Sign Up Mode' : 'Sign In Mode',
+          action: () {
+            setState(() {
+              _isSignInSelected = !_isSignInSelected;
+            });
+            _updateTouchBar();
+          },
+        ),
+        TouchBarHelperAction(
+          label: 'Google Auth',
+          action: () async {
+            // Trigger Google Auth
+            setState(() => _isLoading = true);
+            final response = await SupabaseAuthService.signInWithGoogle();
+            if (!mounted) return;
+            setState(() => _isLoading = false);
+            // Handle response...
+          },
+        ),
+        TouchBarHelperAction(
+          label: _isSignInSelected ? 'Sign In' : 'Create Account',
+          action: () {
+            // Trigger Form Submit
+            // This requires extracting the submit logic to a method
+            if (_isSignInSelected) {
+              _handleSignIn();
+            } else {
+              _handleSignUp();
+            }
+          },
+          isPrimary: true,
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleSignIn() async {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Please enter both email and password',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFF97316),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          elevation: 4,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final response = await SupabaseAuthService.login(
+      email: email,
+      password: password,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (response['success']) {
+      await PushNotificationService.ensurePermissionsAndSyncToken();
+      _navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const DashboardPage()),
+        (Route<dynamic> route) => false,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.error_outline_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  response['message'],
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFEF4444),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          elevation: 4,
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleSignUp() async {
+    final String fullName = _fullNameController.text.trim();
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+
+    if (fullName.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        _selectedRole == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Please fill in all fields and select a role',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFF97316),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          elevation: 4,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await SupabaseAuthService.signUp(
+        email: email,
+        password: password,
+        userMetadata: {"role": _selectedRole, "name": fullName},
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (response['success']) {
+        await PushNotificationService.ensurePermissionsAndSyncToken();
+        _navigatorKey.currentState?.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const DashboardPage()),
+          (Route<dynamic> route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    response['message'],
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+            elevation: 4,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.error_outline_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'An error occurred: $e',
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFEF4444),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          elevation: 4,
+        ),
+      );
+    }
   }
 
   @override
@@ -273,114 +569,7 @@ class _AuthPageState extends State<AuthPage> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _isLoading
-                  ? null
-                  : () async {
-                      final String email = _emailController.text.trim();
-                      final String password = _passwordController.text.trim();
-
-                      if (email.isEmpty || password.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.warning_amber_rounded,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                const Expanded(
-                                  child: Text(
-                                    'Please enter both email and password',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            backgroundColor: const Color(0xFFF97316),
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            margin: const EdgeInsets.all(16),
-                            elevation: 4,
-                          ),
-                        );
-                        return;
-                      }
-
-                      setState(() {
-                        _isLoading = true;
-                      });
-
-                      final response = await SupabaseAuthService.login(
-                        email: email,
-                        password: password,
-                      );
-
-                      if (!mounted) return;
-
-                      setState(() {
-                        _isLoading = false;
-                      });
-
-                      if (response['success']) {
-                        await PushNotificationService.ensurePermissionsAndSyncToken();
-                        _navigatorKey.currentState?.pushAndRemoveUntil(
-                          MaterialPageRoute(
-                            builder: (context) => const DashboardPage(),
-                          ),
-                          (Route<dynamic> route) => false,
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.error_outline_rounded,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    response['message'],
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            backgroundColor: const Color(0xFFEF4444),
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            margin: const EdgeInsets.all(16),
-                            elevation: 4,
-                          ),
-                        );
-                      }
-                    },
+              onPressed: _isLoading ? null : _handleSignIn,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF0F172A),
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1227,6 +1416,7 @@ class _AuthPageState extends State<AuthPage> {
                                     setState(() {
                                       _isSignInSelected = false;
                                     });
+                                    _updateTouchBar();
                                   },
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 200),

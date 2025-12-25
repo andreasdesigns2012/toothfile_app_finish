@@ -7,9 +7,13 @@ import 'package:toothfile/delete_account_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:toothfile/push_notification_service.dart';
 
+import 'package:toothfile/touch_bar_helper.dart';
+import 'package:touch_bar/touch_bar.dart';
+import 'package:toothfile/main.dart';
+import 'package:toothfile/supabase_auth_service.dart';
+
 class SettingsTab extends StatefulWidget {
-  final VoidCallback? onRestoreTouchBar;
-  const SettingsTab({super.key, this.onRestoreTouchBar});
+  const SettingsTab({super.key});
 
   @override
   State<SettingsTab> createState() => _SettingsTabState();
@@ -46,6 +50,79 @@ class _SettingsTabState extends State<SettingsTab> {
     _loadPushEnabled();
     _loadNotificationPrefs();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateTouchBar());
+  }
+
+  void _updateTouchBar() {
+    TouchBarHelper.setDashboardTouchBar(
+      extraItems: [
+        TouchBarButton(
+          label: 'Save Profile',
+          backgroundColor: Colors.blue,
+          onClick: _saveProfile,
+        ),
+        TouchBarButton(
+          label: 'Sign Out',
+          backgroundColor: Colors.red,
+          onClick: _logout,
+        ),
+      ],
+    );
+  }
+
+  Future<void> _logout() async {
+    await SupabaseAuthService.logout();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const MyApp()),
+      (route) => false,
+    );
+  }
+
+  Future<void> _saveProfile() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('No user signed in'),
+          backgroundColor: const Color(0xFFEF4444),
+        ),
+      );
+      return;
+    }
+
+    try {
+      final res = await Supabase.instance.client.auth.updateUser(
+        UserAttributes(data: {'name': _userName}),
+      );
+      await Supabase.instance.client.auth.updateUser(
+        UserAttributes(data: {'role': _userRole}),
+      );
+
+      final updatedUser = res.user;
+      if (updatedUser != null) {
+        setState(() {
+          _userName =
+              updatedUser.userMetadata?['name']?.toString() ?? _userName;
+        });
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Profile updated successfully'),
+            backgroundColor: const Color(0xFF16A34A),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save changes: $e'),
+          backgroundColor: const Color(0xFFEF4444),
+        ),
+      );
+    }
   }
 
   Future<void> _loadDownloadPath() async {
@@ -787,148 +864,7 @@ class _SettingsTabState extends State<SettingsTab> {
                           ],
                         ),
                         child: ElevatedButton.icon(
-                          onPressed: () async {
-                            final user =
-                                Supabase.instance.client.auth.currentUser;
-                            if (user == null) {
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.2),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.error_outline_rounded,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      const Expanded(
-                                        child: Text(
-                                          'No user signed in',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  backgroundColor: const Color(0xFFEF4444),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  margin: const EdgeInsets.all(16),
-                                  elevation: 4,
-                                ),
-                              );
-                              return;
-                            }
-
-                            try {
-                              final res = await Supabase.instance.client.auth
-                                  .updateUser(
-                                    UserAttributes(data: {'name': _userName}),
-                                  );
-                              final res1 = await Supabase.instance.client.auth
-                                  .updateUser(
-                                    UserAttributes(data: {'role': _userRole}),
-                                  );
-
-                              final updatedUser = res.user;
-                              if (updatedUser != null) {
-                                setState(() {
-                                  _userName =
-                                      updatedUser.userMetadata?['name']
-                                          ?.toString() ??
-                                      _userName;
-                                });
-                                if (!mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(
-                                              0.2,
-                                            ),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Icon(
-                                            Icons.check_rounded,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        const Expanded(
-                                          child: Text(
-                                            'Profile updated successfully',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    backgroundColor: const Color(0xFF16A34A),
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    margin: const EdgeInsets.all(16),
-                                    elevation: 4,
-                                  ),
-                                );
-                              }
-                            } catch (e) {
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.2),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.error_outline_rounded,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text(
-                                          'Failed to save changes: $e',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  backgroundColor: const Color(0xFFEF4444),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  margin: const EdgeInsets.all(16),
-                                  elevation: 4,
-                                ),
-                              );
-                            }
-                          },
+                          onPressed: _saveProfile,
                           icon: const Icon(Icons.save_rounded, size: 18),
                           label: const Text(
                             'Save Changes',
@@ -1238,7 +1174,7 @@ class _SettingsTabState extends State<SettingsTab> {
                                   return const DeleteAccountDialog();
                                 },
                               ).then((_) {
-                                widget.onRestoreTouchBar?.call();
+                                _updateTouchBar();
                               });
                             },
                             icon: const Icon(Icons.delete_rounded, size: 18),

@@ -17,10 +17,18 @@ class TouchBarHelperAction {
 }
 
 class TouchBarHelper {
-  static void setDashboardTouchBar({required Function(int) onTabSelected}) {
+  static Function(int)? onTabSelect;
+
+  static void setDashboardTouchBar({
+    Function(int)? onTabSelected,
+    List<TouchBarItem>? extraItems,
+  }) {
     if (defaultTargetPlatform != TargetPlatform.macOS) return;
 
     try {
+      final callback = onTabSelected ?? onTabSelect;
+      if (callback == null) return;
+
       final touchBar = TouchBar(
         children: [
           TouchBarLabel('Dashboard', textColor: Colors.blue),
@@ -35,12 +43,16 @@ class TouchBarHelper {
               TouchBarScrubberLabel('Settings'),
             ],
             onSelect: (index) {
-              onTabSelected(index);
+              callback(index);
             },
             selectedStyle: ScrubberSelectionStyle.outlineOverlay,
             mode: ScrubberMode.fixed,
             showArrowButtons: true,
           ),
+          if (extraItems != null && extraItems.isNotEmpty) ...[
+            TouchBarSpace.flexible(),
+            ...extraItems,
+          ],
         ],
       );
 

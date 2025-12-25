@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:toothfile/touch_bar_helper.dart';
+import 'package:touch_bar/touch_bar.dart';
 
 class DirectoryTab extends StatefulWidget {
   const DirectoryTab({super.key});
@@ -22,6 +24,19 @@ class _DirectoryTabState extends State<DirectoryTab> {
     _searchController = TextEditingController();
     _searchController.addListener(_filterUsers);
     _loadUsers();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateTouchBar());
+  }
+
+  void _updateTouchBar() {
+    TouchBarHelper.setDashboardTouchBar(
+      extraItems: [
+        TouchBarButton(label: 'Refresh', onClick: _loadUsers),
+        TouchBarButton(
+          label: 'Filter: $_selectedRole',
+          onClick: _showRoleFilter,
+        ),
+      ],
+    );
   }
 
   @override
@@ -146,135 +161,156 @@ class _DirectoryTabState extends State<DirectoryTab> {
 
       if (currentUser == null) return;
 
-      String? message = await showModalBottomSheet<String>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) {
-          final messageController = TextEditingController();
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE2E8F0),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+      String? message =
+          await showModalBottomSheet<String>(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) {
+              final messageController = TextEditingController();
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
                     ),
                   ),
-                  Text(
-                    'Connect with $receiverName',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF020817),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Add an optional message to introduce yourself',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: messageController,
-                    maxLines: 4,
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      hintText: 'Hi, I\'d like to connect with you...',
-                      hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF2563EB),
-                          width: 2,
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: const Color(0xFFF8FAFC),
-                      contentPadding: const EdgeInsets.all(16),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            side: const BorderSide(color: Color(0xFFE2E8F0)),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            'Cancel',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF64748B),
-                            ),
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          margin: const EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE2E8F0),
+                            borderRadius: BorderRadius.circular(2),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 2,
-                        child: ElevatedButton.icon(
-                          onPressed: () =>
-                              Navigator.pop(context, messageController.text),
-                          icon: const Icon(Icons.send_rounded, size: 18),
-                          label: const Text(
-                            'Send Request',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2563EB),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
+                      Text(
+                        'Connect with $receiverName',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF020817),
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Add an optional message to introduce yourself',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: messageController,
+                        maxLines: 4,
+                        autofocus: true,
+                        decoration: InputDecoration(
+                          hintText: 'Hi, I\'d like to connect with you...',
+                          hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF2563EB),
+                              width: 2,
+                            ),
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFFF8FAFC),
+                          contentPadding: const EdgeInsets.all(16),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                side: const BorderSide(
+                                  color: Color(0xFFE2E8F0),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF64748B),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 2,
+                            child: ElevatedButton.icon(
+                              onPressed: () => Navigator.pop(
+                                context,
+                                messageController.text,
+                              ),
+                              icon: const Icon(Icons.send_rounded, size: 18),
+                              label: const Text(
+                                'Send Request',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2563EB),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                ],
-              ),
-            ),
-          );
-        },
-      );
+                ),
+              );
+            },
+          ).then((val) {
+            _updateTouchBar();
+            return val;
+          });
 
       if (message == null) return;
 
@@ -381,6 +417,44 @@ class _DirectoryTabState extends State<DirectoryTab> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
+        TouchBarHelper.setPopupTouchBar(
+          context: context,
+          actions: [
+            TouchBarHelperAction(
+              label: 'All Roles',
+              action: () {
+                setState(() {
+                  _selectedRole = 'All Roles';
+                  _filterUsers();
+                  _updateTouchBar();
+                });
+                Navigator.pop(context);
+              },
+            ),
+            TouchBarHelperAction(
+              label: 'Dental Practice',
+              action: () {
+                setState(() {
+                  _selectedRole = 'dental';
+                  _filterUsers();
+                  _updateTouchBar();
+                });
+                Navigator.pop(context);
+              },
+            ),
+            TouchBarHelperAction(
+              label: 'Dental Technician',
+              action: () {
+                setState(() {
+                  _selectedRole = 'technician';
+                  _filterUsers();
+                  _updateTouchBar();
+                });
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
         return Container(
           padding: const EdgeInsets.symmetric(vertical: 20),
           child: Column(
@@ -422,6 +496,7 @@ class _DirectoryTabState extends State<DirectoryTab> {
                       setState(() {
                         _selectedRole = role;
                         _filterUsers();
+                        _updateTouchBar();
                       });
                       Navigator.pop(context);
                     },
@@ -500,7 +575,7 @@ class _DirectoryTabState extends State<DirectoryTab> {
           ),
         );
       },
-    );
+    ).then((_) => _updateTouchBar());
   }
 
   @override
@@ -673,6 +748,7 @@ class _DirectoryTabState extends State<DirectoryTab> {
                     setState(() {
                       _selectedRole = 'All Roles';
                       _filterUsers();
+                      _updateTouchBar();
                     });
                   },
                   backgroundColor: const Color(0xFFDBEAFE),
@@ -696,7 +772,7 @@ class _DirectoryTabState extends State<DirectoryTab> {
                         children: [
                           Container(
                             padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               color: const Color(0xFFF1F5F9),
                               shape: BoxShape.circle,
                             ),
@@ -903,8 +979,8 @@ class UserCard extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF020817),
                           height: 1.3,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 6),
                       Container(
@@ -955,8 +1031,8 @@ class UserCard extends StatelessWidget {
                       fontSize: 13,
                       color: Color(0xFF64748B),
                       height: 1.4,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],

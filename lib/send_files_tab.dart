@@ -1,6 +1,8 @@
 import 'package:toothfile/send_files_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:toothfile/touch_bar_helper.dart';
+import 'package:touch_bar/touch_bar.dart';
 
 class SendFilesTab extends StatefulWidget {
   const SendFilesTab({super.key});
@@ -23,6 +25,19 @@ class _SendFilesTabState extends State<SendFilesTab> {
     _searchController = TextEditingController();
     _searchController.addListener(_filterUsers);
     _fetchUsers();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateTouchBar());
+  }
+
+  void _updateTouchBar() {
+    TouchBarHelper.setDashboardTouchBar(
+      extraItems: [
+        TouchBarButton(label: 'Refresh', onClick: _fetchUsers),
+        TouchBarButton(
+          label: 'Filter: $_selectedRole',
+          onClick: _showRoleFilter,
+        ),
+      ],
+    );
   }
 
   @override
@@ -111,6 +126,44 @@ class _SendFilesTabState extends State<SendFilesTab> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
+        TouchBarHelper.setPopupTouchBar(
+          context: context,
+          actions: [
+            TouchBarHelperAction(
+              label: 'All Roles',
+              action: () {
+                setState(() {
+                  _selectedRole = 'All Roles';
+                  _filterUsers();
+                  _updateTouchBar();
+                });
+                Navigator.pop(context);
+              },
+            ),
+            TouchBarHelperAction(
+              label: 'Dental Practice',
+              action: () {
+                setState(() {
+                  _selectedRole = 'dental';
+                  _filterUsers();
+                  _updateTouchBar();
+                });
+                Navigator.pop(context);
+              },
+            ),
+            TouchBarHelperAction(
+              label: 'Dental Technician',
+              action: () {
+                setState(() {
+                  _selectedRole = 'technician';
+                  _filterUsers();
+                  _updateTouchBar();
+                });
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
         return Container(
           padding: const EdgeInsets.symmetric(vertical: 20),
           child: Column(
@@ -152,6 +205,7 @@ class _SendFilesTabState extends State<SendFilesTab> {
                       setState(() {
                         _selectedRole = role;
                         _filterUsers();
+                        _updateTouchBar();
                       });
                       Navigator.pop(context);
                     },
@@ -230,7 +284,9 @@ class _SendFilesTabState extends State<SendFilesTab> {
           ),
         );
       },
-    );
+    ).then((_) {
+      _updateTouchBar();
+    });
   }
 
   @override
@@ -402,6 +458,7 @@ class _SendFilesTabState extends State<SendFilesTab> {
                     setState(() {
                       _selectedRole = 'All Roles';
                       _filterUsers();
+                      _updateTouchBar();
                     });
                   },
                   backgroundColor: const Color(0xFFF3E8FF),
@@ -678,7 +735,7 @@ class _SendFilesTabState extends State<SendFilesTab> {
                       builder: (BuildContext context) {
                         return SendFilesDialog(userData: user);
                       },
-                    );
+                    ).then((_) => _updateTouchBar());
                   },
                   borderRadius: BorderRadius.circular(12),
                   child: Padding(

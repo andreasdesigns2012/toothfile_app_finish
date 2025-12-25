@@ -18,16 +18,29 @@ class TouchBarHelperAction {
 
 class TouchBarHelper {
   static Function(int)? onTabSelect;
+  static int _currentTabIndex = 0;
+
+  static int get currentTabIndex => _currentTabIndex;
+
+  static void setCurrentTabIndex(int index) {
+    _currentTabIndex = index;
+  }
 
   static void setDashboardTouchBar({
     Function(int)? onTabSelected,
     List<TouchBarItem>? extraItems,
+    int? currentTabIndex,
   }) {
     if (defaultTargetPlatform != TargetPlatform.macOS) return;
 
     try {
       final callback = onTabSelected ?? onTabSelect;
       if (callback == null) return;
+
+      // Store the current tab index for future reference
+      if (currentTabIndex != null) {
+        _currentTabIndex = currentTabIndex;
+      }
 
       final touchBar = TouchBar(
         children: [

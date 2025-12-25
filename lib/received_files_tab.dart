@@ -34,6 +34,7 @@ class _ReceivedFilesTabState extends State<ReceivedFilesTab> {
 
   void _updateTouchBar() {
     TouchBarHelper.setDashboardTouchBar(
+      currentTabIndex: 0,
       extraItems: [
         TouchBarButton(label: 'Refresh', onClick: _fetchReceivedFiles),
       ],

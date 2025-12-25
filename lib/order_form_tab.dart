@@ -44,6 +44,7 @@ class _OrderFormTabState extends State<OrderFormTab> {
 
   void _updateTouchBar() {
     TouchBarHelper.setDashboardTouchBar(
+      currentTabIndex: 5,
       extraItems: [
         TouchBarButton(
           label: 'New Order',

@@ -23,6 +23,7 @@ class _RequestsTabState extends State<RequestsTab> {
 
   void _updateTouchBar() {
     TouchBarHelper.setDashboardTouchBar(
+      currentTabIndex: 3,
       extraItems: [
         TouchBarButton(label: 'Refresh', onClick: _loadConnectionRequests),
       ],

@@ -79,7 +79,7 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _setTouchBar() {
-    TouchBarHelper.setDashboardTouchBar();
+    TouchBarHelper.setDashboardTouchBar(currentTabIndex: _selectedIndex);
   }
 
   @override
@@ -484,6 +484,8 @@ class _DashboardPageState extends State<DashboardPage> {
             if (_isMenuOpen) {
               _removeOverlay();
             }
+            TouchBarHelper.setCurrentTabIndex(index);
+            TouchBarHelper.setDashboardTouchBar(currentTabIndex: index);
           });
         },
         borderRadius: BorderRadius.circular(8),

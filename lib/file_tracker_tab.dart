@@ -28,6 +28,7 @@ class _FileTrackerTabState extends State<FileTrackerTab> {
 
   void _updateTouchBar() {
     TouchBarHelper.setDashboardTouchBar(
+      currentTabIndex: 2,
       extraItems: [
         TouchBarButton(label: 'Refresh', onClick: _loadSentFiles),
         TouchBarButton(

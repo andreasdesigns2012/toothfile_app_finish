@@ -6,8 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:toothfile/dashboard_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:toothfile/supabase_auth_service.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_core/firebase_core.dart';  // Temporarily disabled for Windows Release build
+// import 'package:firebase_messaging/firebase_messaging.dart';  // Temporarily disabled for Windows Release build
 import 'package:toothfile/push_notification_service.dart';
 import 'package:toothfile/touch_bar_helper.dart';
 
@@ -48,6 +48,8 @@ Future<void> main() async {
     // If you need specific handling, consider adding 'app_links' or 'uni_links'.
   }
 
+  // Firebase temporarily disabled for Windows Release build
+  /*
   if (kIsWeb ||
       (!kIsWeb &&
           (defaultTargetPlatform == TargetPlatform.android ||
@@ -57,6 +59,7 @@ Future<void> main() async {
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     } catch (_) {}
   }
+  */
 
   try {
     await Supabase.initialize(

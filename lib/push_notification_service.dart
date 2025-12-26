@@ -2,17 +2,20 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_core/firebase_core.dart';  // Temporarily disabled for Windows Release build
+// import 'package:firebase_messaging/firebase_messaging.dart';  // Temporarily disabled for Windows Release build
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:toothfile/dashboard_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Firebase temporarily disabled for Windows Release build
+/*
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 }
+*/
 
 class PushNotificationService {
   static final FlutterLocalNotificationsPlugin _flnp =
@@ -46,7 +49,9 @@ class PushNotificationService {
         (!kIsWeb &&
             (defaultTargetPlatform == TargetPlatform.android ||
                 defaultTargetPlatform == TargetPlatform.iOS) &&
-            Firebase.apps.isNotEmpty);
+            // Firebase temporarily disabled for Windows Release build
+            // Firebase.apps.isNotEmpty);
+            false); // Temporarily disable Firebase for Windows Release build
   }
 
   static Future<void> initialize(GlobalKey<NavigatorState> navigatorKey) async {
@@ -86,12 +91,18 @@ class PushNotificationService {
     );
 
     if (_pushCapable) {
+      // Firebase temporarily disabled for Windows Release build
+      /*
       await FirebaseMessaging.instance
           .setForegroundNotificationPresentationOptions(
             alert: true,
             badge: true,
             sound: true,
           );
+      */
+      // Skip Firebase messaging for Windows Release build
+      // Firebase temporarily disabled for Windows Release build
+      /*
       FirebaseMessaging.onMessage.listen((message) async {
         final notification = message.notification;
         final payload = jsonEncode(message.data);
@@ -177,6 +188,7 @@ class PushNotificationService {
       FirebaseMessaging.onMessageOpenedApp.listen((message) {
         _handleData(message.data);
       });
+      */
     } else {
       _authSub?.cancel();
       _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((
@@ -200,6 +212,8 @@ class PushNotificationService {
     if (!_pushCapable) {
       return;
     }
+    // Firebase temporarily disabled for Windows Release build
+    /*
     await FirebaseMessaging.instance.requestPermission(
       alert: true,
       badge: true,
@@ -212,6 +226,10 @@ class PushNotificationService {
         >()
         ?.requestPermissions(alert: true, badge: true, sound: true);
     final token = await FirebaseMessaging.instance.getToken();
+    */
+    // Use a dummy token for Windows Release build
+    final token =
+        'windows-release-dummy-token'; // Temporarily disabled Firebase
     final client = Supabase.instance.client;
     final user = client.auth.currentUser;
     if (user == null) return;

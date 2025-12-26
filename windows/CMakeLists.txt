@@ -49,6 +49,14 @@ endfunction()
 set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 add_subdirectory(${FLUTTER_MANAGED_DIR})
 
+# Add Firebase stub library for Release builds
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+  add_library(firebase_app_stub STATIC firebase_stub.cpp)
+  target_compile_features(firebase_app_stub PUBLIC cxx_std_17)
+  target_compile_definitions(firebase_app_stub PRIVATE NDEBUG)
+  set_target_properties(firebase_app_stub PROPERTIES OUTPUT_NAME "firebase_app")
+endif()
+
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")
 
